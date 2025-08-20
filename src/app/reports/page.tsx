@@ -92,6 +92,7 @@ const getStatusBadgeVariant = (status: Report['status']) => {
 
 export default function ReportsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [reports, setReports] = useState<Report[]>(mockReports);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {
@@ -104,6 +105,20 @@ export default function ReportsPage() {
             </div>
         );
     }
+
+  const handleReportSubmitted = (data: { location: string, reason: string, description: string }) => {
+    const newReport: Report = {
+        id: `REP-${String(reports.length + 1).padStart(3, '0')}`,
+        location: data.location,
+        reason: data.reason,
+        description: data.description,
+        date: new Date().toISOString().split('T')[0],
+        status: 'Received',
+    }
+    setReports(prevReports => [newReport, ...prevReports]);
+    setIsSheetOpen(false);
+  };
+
 
   return (
     <APIProvider apiKey={apiKey}>
@@ -146,7 +161,7 @@ export default function ReportsPage() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {mockReports.map((report) => (
+                    {reports.map((report) => (
                         <TableRow key={report.id}>
                         <TableCell className="font-medium">{report.location}</TableCell>
                         <TableCell>{report.reason}</TableCell>
@@ -168,7 +183,7 @@ export default function ReportsPage() {
                     Your report helps us improve safety data for everyone. Describe what you're observing.
                 </SheetDescription>
                 </SheetHeader>
-                <IncidentReportForm onSubmitted={() => setIsSheetOpen(false)} />
+                <IncidentReportForm onSubmitted={handleReportSubmitted} />
             </SheetContent>
         </Sheet>
         </MainLayout>

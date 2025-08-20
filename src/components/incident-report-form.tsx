@@ -32,7 +32,12 @@ function IncidentSubmitButton() {
   );
 }
 
-export const IncidentReportForm = ({onSubmitted}: {onSubmitted: () => void}) => {
+type IncidentReportFormProps = {
+  onSubmitted: (data: { location: string; reason: string; description: string; }) => void;
+};
+
+
+export const IncidentReportForm = ({onSubmitted}: IncidentReportFormProps) => {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   
@@ -45,8 +50,15 @@ export const IncidentReportForm = ({onSubmitted}: {onSubmitted: () => void}) => 
         title: "Report Submitted",
         description: state.result.confirmation.message,
       });
-      formRef.current?.reset();
-      onSubmitted();
+
+      if (formRef.current) {
+        const formData = new FormData(formRef.current);
+        const location = formData.get('location') as string;
+        const reason = formData.get('reason') as string;
+        const description = formData.get('description') as string;
+        onSubmitted({ location, reason, description });
+        formRef.current.reset();
+      }
     }
     if (state?.error) {
       toast({
