@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -50,17 +51,12 @@ const Directions = ({ route }: MapViewProps) => {
       })
       .then(response => {
         const newRenderers: google.maps.DirectionsRenderer[] = [];
-        const routeColors = ['#16A34A', '#F97316', '#DC2626']; // Green, Orange, Red
+        // The safest route is green, second is orange, third is red.
+        const routeColors = ['#16A34A', '#F97316', '#DC2626'];
 
-        response.routes.forEach((r, i) => {
-          // Match route from Google with our scored route.
-          // This is a simplification. A real app might match on geometry.
-          const scoreIndex = route.allRoutes.length > i ? i : route.allRoutes.length - 1;
-          const score = route.allRoutes[scoreIndex].safetyScore;
-          
-          let color = routeColors[2]; // Default to red
-          if (score > 75) color = routeColors[0];
-          else if (score > 40) color = routeColors[1];
+        response.routes.slice(0, 3).forEach((_, i) => {
+          // Since allRoutes is sorted from safest to least safe, we can use the index directly.
+          const color = routeColors[i] || routeColors[routeColors.length -1];
           
           const renderer = new routesLibrary.DirectionsRenderer({
             map,
@@ -68,7 +64,7 @@ const Directions = ({ route }: MapViewProps) => {
             routeIndex: i,
             polylineOptions: {
               strokeColor: color,
-              strokeOpacity: i === 0 ? 1.0 : 0.7, // Highlight safest route
+              strokeOpacity: i === 0 ? 1.0 : 0.8, // Highlight safest route
               strokeWeight: i === 0 ? 8 : 6,
             },
           });
