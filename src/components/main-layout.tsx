@@ -97,9 +97,10 @@ const SafetyStatus = () => (
 type MainLayoutProps = {
     children: React.ReactNode;
     onSosActivate?: () => void;
+    alertSent?: boolean;
 };
 
-export function MainLayout({ children, onSosActivate }: MainLayoutProps) {
+export function MainLayout({ children, onSosActivate, alertSent }: MainLayoutProps) {
   const pathname = usePathname();
 
   if (pathname === '/find-route') {
@@ -145,7 +146,7 @@ export function MainLayout({ children, onSosActivate }: MainLayoutProps) {
                 </main>
             </div>
              <div className="absolute bottom-4 right-4 z-20">
-                <SOSButton onActivate={onSosActivate || (() => alert("SOS Activated! This can be configured."))} />
+                { !alertSent && <SOSButton onActivate={onSosActivate || (() => alert("SOS Activated! This can be configured."))} /> }
             </div>
         </div>
     </SidebarProvider>
