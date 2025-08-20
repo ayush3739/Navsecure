@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useActionState, useRef, useEffect } from 'react';
+import { useState, useActionState, useRef, useEffect, useCallback } from 'react';
 import type { ActionState, SafetyScoreResult } from '@/lib/types';
 import {
   Shield,
@@ -20,8 +20,9 @@ import {
   Phone,
   User,
   AlertTriangle,
+  LocateFixed,
 } from 'lucide-react';
-import { APIProvider } from '@vis.gl/react-google-maps';
+import { APIProvider, useMap } from '@vis.gl/react-google-maps';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -234,6 +235,39 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
   )
 }
 
+const CurrentLocationControl = () => {
+  const map = useMap();
+  const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
+
+  const handleLocateClick = useCallback(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setCurrentPosition(pos);
+          map?.panTo(pos);
+          map?.setZoom(15);
+        },
+        () => {
+          alert("Error: The Geolocation service failed.");
+        }
+      );
+    } else {
+      alert("Error: Your browser doesn't support geolocation.");
+    }
+  }, [map]);
+
+  return (
+    <Button size="icon" onClick={handleLocateClick} variant="secondary">
+        <LocateFixed className="h-5 w-5" />
+    </Button>
+  );
+};
+
+
 export default function FindRoutePage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -304,7 +338,7 @@ export default function FindRoutePage() {
             </DropdownMenu>
         </div>
         
-        <div className="absolute top-4 right-4 z-20">
+        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                   <Button variant="secondary">
@@ -322,6 +356,7 @@ export default function FindRoutePage() {
                   <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
               </SheetContent>
             </Sheet>
+            <CurrentLocationControl />
         </div>
 
          <div className="absolute bottom-4 right-4 z-20">
