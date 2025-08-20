@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
-import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -235,16 +234,13 @@ export default function FindRoutePage() {
 
   return (
     <APIProvider apiKey={apiKey}>
-      <MainLayout>
         <div className="flex h-full">
-          <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border">
-            <ScrollArea className="h-full">
+          <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border overflow-y-auto">
               <div className="p-6 space-y-6">
                 <RoutePlanner onScoreGenerated={setSafetyResult} />
                 {safetyResult && <SafetyScoreCard result={safetyResult} />}
                 <SafeSpotsList result={safetyResult} />
               </div>
-            </ScrollArea>
           </aside>
           <main className="flex-1 relative h-full">
             <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
@@ -269,7 +265,6 @@ export default function FindRoutePage() {
             </div>
           </main>
         </div>
-      </MainLayout>
     </APIProvider>
   );
 }

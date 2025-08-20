@@ -129,7 +129,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 </SidebarFooter>
             </Sidebar>
 
-            <main className="flex-1 overflow-y-auto">
+            <main className="flex-1">
                 {children}
             </main>
         </div>
