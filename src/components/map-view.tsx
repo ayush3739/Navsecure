@@ -39,11 +39,11 @@ export function MapView() {
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  if (!apiKey) {
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
     return (
       <div className="w-full h-full bg-muted flex items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          <p>Google Maps API key is missing.</p>
+        <div className="text-center text-muted-foreground p-4">
+          <p className="font-bold">Google Maps API key is missing.</p>
           <p className="text-sm">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file.</p>
         </div>
       </div>
@@ -62,7 +62,7 @@ export function MapView() {
       >
         <Polyline
             path={mockRoutePath}
-            strokeColor="#E6E6FA"
+            strokeColor="hsl(var(--secondary-foreground))"
             strokeOpacity={0.8}
             strokeWeight={6}
           />
