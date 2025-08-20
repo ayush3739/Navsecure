@@ -325,7 +325,7 @@ export default function FindRoutePage() {
         </div>
 
          <div className="absolute bottom-4 right-4 z-20">
-            <SOSButton />
+            <SOSButton onAlertSent={() => {}} />
         </div>
       </div>
     </APIProvider>
