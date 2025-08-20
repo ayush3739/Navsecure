@@ -38,6 +38,16 @@ export default function EmergencyPage() {
         }
     }, []);
 
+    useEffect(() => {
+        if (alertSent && primaryContact) {
+            // Simulate sharing location and calling contact
+            alert(`Sharing live location with ${primaryContact.name}.`);
+            alert(`Calling ${primaryContact.name} at ${primaryContact.phone}.`);
+        } else if (alertSent) {
+             alert(`Sharing live location with emergency services.`);
+        }
+    }, [alertSent, primaryContact]);
+
     if (!apiKey) {
         return (
             <div className="w-full h-screen bg-muted flex items-center justify-center">
@@ -73,7 +83,7 @@ export default function EmergencyPage() {
                     </div>
                 ) : (
                     <>
-                        <SOSButton onAlertSent={() => setAlertSent(true)} />
+                        <SOSButton onActivate={() => setAlertSent(true)} />
                         <p className="text-muted-foreground mt-6">
                             Press and hold for 3 seconds to activate emergency alert
                         </p>

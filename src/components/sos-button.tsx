@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { ShieldCheck } from 'lucide-react';
 
-export const SOSButton = ({ onAlertSent }: { onAlertSent: () => void }) => {
+export const SOSButton = ({ onActivate }: { onActivate: () => void }) => {
   const [isPressed, setIsPressed] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -38,21 +38,24 @@ export const SOSButton = ({ onAlertSent }: { onAlertSent: () => void }) => {
     if (countdown === 0) {
       clearAllTimeouts();
       setIsActivating(false);
-      onAlertSent();
+      onActivate();
     }
-  }, [countdown, onAlertSent]);
+  }, [countdown, onActivate]);
 
   const handlePressStart = () => {
     setIsPressed(true);
     pressTimerRef.current = setTimeout(() => {
       setIsActivating(true);
-      setIsPressed(false);
+      setIsPressed(false); // Reset press state
     }, 3000);
   };
 
   const handlePressEnd = () => {
     setIsPressed(false);
-    clearAllTimeouts();
+    // Don't clear timeouts if we are already activating
+    if (!isActivating) {
+        clearAllTimeouts();
+    }
   };
 
   const handleCancel = () => {
