@@ -14,10 +14,13 @@ import {
   Info,
   Loader2,
   Send,
+  PlusCircle,
+  Trash2,
+  Pencil,
 } from 'lucide-react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,9 +32,20 @@ import {
   SheetTrigger,
   SheetClose
 } from '@/components/ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -121,9 +135,9 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
 
 const SafeSpotsList = () => {
   const safeSpots = [
-    { name: 'City General Hospital', type: 'Hospital', icon: Hospital },
-    { name: 'Downtown Police Dept.', type: 'Police', icon: ShieldCheck },
-    { name: 'Community Center', type: 'Shelter', icon: HeartHandshake },
+    { name: 'Lok Nayak Hospital', type: 'Hospital', icon: Hospital },
+    { name: 'Connaught Place Police Station', type: 'Police', icon: ShieldCheck },
+    { name: 'Govt Girls Senior Secondary School', type: 'Shelter', icon: HeartHandshake },
   ];
   return (
     <Card>
@@ -150,35 +164,137 @@ const SafeSpotsList = () => {
   );
 };
 
+type Contact = { id: string; name: string; relation: string; };
+
+const EmergencyContactForm = ({
+  onSave,
+  contact,
+}: {
+  onSave: (contact: Contact) => void;
+  contact?: Contact | null;
+}) => {
+  const [name, setName] = useState(contact?.name || '');
+  const [relation, setRelation] = useState(contact?.relation || '');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name && relation) {
+      onSave({
+        id: contact?.id || Date.now().toString(),
+        name,
+        relation,
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Jane Doe" required />
+      </div>
+      <div>
+        <Label htmlFor="relation">Relation</Label>
+        <Input id="relation" value={relation} onChange={(e) => setRelation(e.target.value)} placeholder="e.g., Sister" required />
+      </div>
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button type="button" variant="secondary">Cancel</Button>
+        </DialogClose>
+        <Button type="submit">Save Contact</Button>
+      </DialogFooter>
+    </form>
+  );
+};
+
+
 const EmergencyContacts = () => {
-  const contacts = [
-    { name: 'Jane Doe', relation: 'Sister' },
-    { name: 'John Smith', relation: 'Friend' },
-  ];
+  const [contacts, setContacts] = useState<Contact[]>([
+    { id: '1', name: 'Jane Doe', relation: 'Sister' },
+    { id: '2', name: 'John Smith', relation: 'Friend' },
+  ]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+
+  const handleSaveContact = (contact: Contact) => {
+    const existingIndex = contacts.findIndex(c => c.id === contact.id);
+    if (existingIndex > -1) {
+      const updatedContacts = [...contacts];
+      updatedContacts[existingIndex] = contact;
+      setContacts(updatedContacts);
+    } else {
+      setContacts([...contacts, contact]);
+    }
+    setIsDialogOpen(false);
+    setEditingContact(null);
+  };
+
+  const handleEdit = (contact: Contact) => {
+    setEditingContact(contact);
+    setIsDialogOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingContact(null);
+    setIsDialogOpen(true);
+  };
+  
+  const handleDelete = (id: string) => {
+    setContacts(contacts.filter(c => c.id !== id));
+  };
+
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Phone className="w-5 h-5 text-primary" />
-          Emergency Contacts
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="w-5 h-5 text-primary" />
+            Emergency Contacts
+          </CardTitle>
+          <Button size="sm" variant="ghost" onClick={handleAddNew}>
+            <PlusCircle className="w-4 h-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <ul className="space-y-3">
           {contacts.map((contact) => (
-            <li key={contact.name} className="flex justify-between items-center">
+            <li key={contact.id} className="flex justify-between items-center group">
               <div>
                 <p className="font-medium">{contact.name}</p>
                 <p className="text-sm text-muted-foreground">{contact.relation}</p>
               </div>
-              <Button size="sm" variant="secondary">Call</Button>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(contact)}>
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDelete(contact.id)}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingContact ? 'Edit Contact' : 'Add New Contact'}</DialogTitle>
+              <DialogDescription>
+                Enter the details of your emergency contact.
+              </DialogDescription>
+            </DialogHeader>
+            <EmergencyContactForm
+              onSave={handleSaveContact}
+              contact={editingContact}
+            />
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
 };
+
 
 function SubmitButton() {
   const { pending } = useFormStatus();
