@@ -9,7 +9,7 @@ import {
   ControlPosition,
   useAdvancedMarkerRef
 } from '@vis.gl/react-google-maps';
-import { Hospital, ShieldCheck, Circle } from 'lucide-react';
+import { Hospital, ShieldCheck, HeartHandshake, Circle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SafetyScoreResult } from '@/lib/types';
 import { Card } from '@/components/ui/card';
@@ -119,6 +119,7 @@ export function MapView({ route }: MapViewProps) {
   const safeSpots = [
     { id: 1, pos: { lat: 28.6358, lng: 77.2244 }, name: 'Lok Nayak Hospital', type: 'hospital' },
     { id: 2, pos: { lat: 28.6324, lng: 77.2169 }, name: 'Connaught Place Police Station', type: 'police' },
+    { id: 3, pos: { lat: 28.6275, lng: 77.2155 }, name: 'Govt Girls Senior Secondary School', type: 'shelter' },
   ];
 
   return (
@@ -139,7 +140,7 @@ export function MapView({ route }: MapViewProps) {
         {safeSpots.map((spot) => (
           <AdvancedMarker key={spot.id} position={spot.pos} title={spot.name}>
             <div className='p-2 bg-card rounded-full shadow-lg'>
-              {spot.type === 'hospital' ? <Hospital className="h-5 w-5 text-green-400" /> : <ShieldCheck className="h-5 w-5 text-blue-400" />}
+              {spot.type === 'hospital' ? <Hospital className="h-5 w-5 text-green-400" /> : spot.type === 'police' ? <ShieldCheck className="h-5 w-5 text-blue-400" /> : <HeartHandshake className="h-5 w-5 text-pink-400" />}
             </div>
           </AdvancedMarker>
         ))}

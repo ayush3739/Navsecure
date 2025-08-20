@@ -133,12 +133,15 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   );
 };
 
-const SafeSpotsList = () => {
+const SafeSpotsList = ({ result }: { result: SafetyScoreResult | null }) => {
   const safeSpots = [
     { name: 'Lok Nayak Hospital', type: 'Hospital', icon: Hospital },
     { name: 'Connaught Place Police Station', type: 'Police', icon: ShieldCheck },
     { name: 'Govt Girls Senior Secondary School', type: 'Shelter', icon: HeartHandshake },
   ];
+  
+  if (!result) return null;
+
   return (
     <Card>
       <CardHeader>
@@ -394,7 +397,7 @@ export default function DashboardPage() {
               <Separator />
               <RoutePlanner onScoreGenerated={setSafetyResult} />
               {safetyResult && <SafetyScoreCard result={safetyResult} />}
-              <SafeSpotsList />
+              <SafeSpotsList result={safetyResult} />
               <EmergencyContacts />
             </div>
           </ScrollArea>
