@@ -273,7 +273,7 @@ export default function FindRoutePage() {
           <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
         </main>
         
-        <div className="absolute top-4 left-4 z-20 flex gap-2">
+        <div className="absolute top-4 left-4 z-20">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon">
@@ -296,25 +296,28 @@ export default function FindRoutePage() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
+        </div>
+        
+        <div className="absolute top-4 right-4 z-20">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild>
-                <Button variant="secondary">
-                <MessageCircleWarning className="mr-2 h-4 w-4" />
-                Live Reporting
-                </Button>
-            </SheetTrigger>
-            <SheetContent>
-                <SheetHeader>
-                <SheetTitle>Report an Incident</SheetTitle>
-                <SheetDescription>
-                    Your report helps us improve safety data for everyone. Describe what you're observing.
-                </SheetDescription>
-                </SheetHeader>
-                <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
-            </SheetContent>
+              <SheetTrigger asChild>
+                  <Button variant="secondary">
+                  <MessageCircleWarning className="mr-2 h-4 w-4" />
+                  Live Reporting
+                  </Button>
+              </SheetTrigger>
+              <SheetContent>
+                  <SheetHeader>
+                  <SheetTitle>Report an Incident</SheetTitle>
+                  <SheetDescription>
+                      Your report helps us improve safety data for everyone. Describe what you're observing.
+                  </SheetDescription>
+                  </SheetHeader>
+                  <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
+              </SheetContent>
             </Sheet>
         </div>
+
          <div className="absolute bottom-4 right-4 z-20">
             <SOSButton />
         </div>
