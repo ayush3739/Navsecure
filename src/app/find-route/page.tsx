@@ -13,6 +13,7 @@ import {
   Info,
   Loader2,
   Send,
+  Search,
 } from 'lucide-react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
@@ -146,19 +147,19 @@ const SafeSpotsList = ({ result }: { result: SafetyScoreResult | null }) => {
   );
 };
 
-function SubmitButton() {
+function IncidentSubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" className="w-full" disabled={pending}>
       {pending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Analyzing...
+          Submitting...
         </>
       ) : (
         <>
-          <Search className="mr-2 h-4 w-4" />
-          Find Safest Route
+          <Send className="mr-2 h-4 w-4" />
+          Submit Report
         </>
       )}
     </Button>
@@ -212,7 +213,7 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
         {state?.fieldErrors?.reason && <p className="text-sm text-destructive mt-1">{state.fieldErrors.reason[0]}</p>}
        </div>
       <Textarea name="description" placeholder="Provide a brief description (optional)" />
-      <SubmitButton />
+      <IncidentSubmitButton />
     </form>
   )
 }
@@ -236,35 +237,39 @@ export default function FindRoutePage() {
   return (
     <APIProvider apiKey={apiKey}>
       <MainLayout>
-        <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border overflow-y-auto">
-            <div className="p-6 space-y-6">
-              <RoutePlanner onScoreGenerated={setSafetyResult} />
-              {safetyResult && <SafetyScoreCard result={safetyResult} />}
-              <SafeSpotsList result={safetyResult} />
+        <div className="flex h-full">
+            <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border">
+                <ScrollArea className="h-full">
+                    <div className="p-6 space-y-6">
+                        <RoutePlanner onScoreGenerated={setSafetyResult} />
+                        {safetyResult && <SafetyScoreCard result={safetyResult} />}
+                        <SafeSpotsList result={safetyResult} />
+                    </div>
+                </ScrollArea>
+            </aside>
+            <main className="flex-1 relative">
+            <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
+            <div className="absolute top-4 right-4 flex gap-2">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                    <Button variant="secondary">
+                    <MessageCircleWarning className="mr-2 h-4 w-4" />
+                    Live Reporting
+                    </Button>
+                </SheetTrigger>
+                <SheetContent>
+                    <SheetHeader>
+                    <SheetTitle>Report an Incident</SheetTitle>
+                    <SheetDescription>
+                        Your report helps us improve safety data for everyone. Describe what you're observing.
+                    </SheetDescription>
+                    </SheetHeader>
+                    <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
+                </SheetContent>
+                </Sheet>
             </div>
-        </aside>
-        <main className="flex-1 relative">
-          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
-          <div className="absolute top-4 right-4 flex gap-2">
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                  <Button variant="secondary">
-                  <MessageCircleWarning className="mr-2 h-4 w-4" />
-                  Live Reporting
-                  </Button>
-              </SheetTrigger>
-              <SheetContent>
-                  <SheetHeader>
-                  <SheetTitle>Report an Incident</SheetTitle>
-                  <SheetDescription>
-                      Your report helps us improve safety data for everyone. Describe what you're observing.
-                  </SheetDescription>
-                  </SheetHeader>
-                  <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
-              </SheetContent>
-              </Sheet>
-          </div>
-        </main>
+            </main>
+        </div>
       </MainLayout>
     </APIProvider>
   );

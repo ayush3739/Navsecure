@@ -129,7 +129,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 </SidebarFooter>
             </Sidebar>
 
-            <div className="flex-1 flex h-full">
+            <div className="flex-1 flex flex-col h-full">
                 {children}
             </div>
         </div>
