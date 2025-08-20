@@ -14,6 +14,12 @@ import {
   Loader2,
   Send,
   PanelLeft,
+  Menu,
+  Compass,
+  FileText,
+  Phone,
+  User,
+  AlertTriangle,
 } from 'lucide-react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
@@ -42,6 +48,8 @@ import { MapView } from '@/components/map-view';
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { SOSButton } from '@/components/sos-button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import Link from 'next/link';
 
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
@@ -225,6 +233,14 @@ export default function FindRoutePage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const menuItems = [
+    { href: '/emergency', label: 'Emergency', icon: AlertTriangle },
+    { href: '/find-route', label: 'Find Route', icon: Compass },
+    { href: '/reports', label: 'Reports', icon: FileText },
+    { href: '/contacts', label: 'Emergency Contacts', icon: Phone },
+    { href: '/profile', label: 'Profile', icon: User },
+  ];
+
 
   if (!apiKey) {
       return (
@@ -258,9 +274,29 @@ export default function FindRoutePage() {
         </main>
         
         <div className="absolute top-4 left-4 z-20 flex gap-2">
-            <Button variant="secondary" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                <PanelLeft className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                    <PanelLeft className="mr-2 h-4 w-4" />
+                    <span>{isSidebarOpen ? 'Hide' : 'Show'} Controls</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {menuItems.map((item) => (
+                   <Link href={item.href} key={item.href}>
+                    <DropdownMenuItem>
+                        <item.icon className="mr-2 h-4 w-4" />
+                        <span>{item.label}</span>
+                    </DropdownMenuItem>
+                   </Link>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
                 <Button variant="secondary">
