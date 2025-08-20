@@ -122,18 +122,7 @@ export default function ReportsPage() {
 
   return (
     <APIProvider apiKey={apiKey}>
-      <>
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Report an Incident</SheetTitle>
-              <SheetDescription>
-                Your report helps us improve safety data for everyone. Describe what you're observing.
-              </SheetDescription>
-            </SheetHeader>
-            <IncidentReportForm onSubmitted={handleReportSubmitted} />
-          </SheetContent>
-        </Sheet>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <MainLayout>
           <div className="p-6 md:p-8 space-y-6">
             <header className="flex items-center justify-between gap-3">
@@ -188,7 +177,16 @@ export default function ReportsPage() {
             </Card>
           </div>
         </MainLayout>
-      </>
+        <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Report an Incident</SheetTitle>
+              <SheetDescription>
+                Your report helps us improve safety data for everyone. Describe what you're observing.
+              </SheetDescription>
+            </SheetHeader>
+            <IncidentReportForm onSubmitted={handleReportSubmitted} />
+        </SheetContent>
+      </Sheet>
     </APIProvider>
   );
 }
