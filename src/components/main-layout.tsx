@@ -7,10 +7,8 @@ import {
   AlertTriangle,
   Compass,
   FileText,
-  HeartHandshake,
-  User,
-  PanelLeft,
   Phone,
+  User,
 } from 'lucide-react';
 
 import {
@@ -22,10 +20,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarProvider,
-  SidebarTrigger,
-  SidebarInset,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 
