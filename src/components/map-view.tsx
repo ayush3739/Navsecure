@@ -11,6 +11,7 @@ import { Hospital, ShieldCheck, HeartHandshake, Circle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SafetyScoreResult } from '@/lib/types';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 type MapViewProps = {
   route: {
@@ -23,6 +24,7 @@ type MapViewProps = {
 const Directions = ({ route }: MapViewProps) => {
   const map = useMap();
   const routesLibrary = useMapsLibrary('routes');
+  const { toast } = useToast();
   const [directionsService, setDirectionsService] = useState<google.maps.DirectionsService>();
   const [directionsRenderers, setDirectionsRenderers] = useState<google.maps.DirectionsRenderer[]>([]);
 
@@ -84,14 +86,23 @@ const Directions = ({ route }: MapViewProps) => {
         });
         
         setDirectionsRenderers(newRenderers);
-      }).catch(e => console.error('Directions request failed', e));
+      }).catch((e: google.maps.MapsRequestError) => {
+        console.error('Directions request failed', e);
+        if (e.code === 'ZERO_RESULTS') {
+            toast({
+                variant: 'destructive',
+                title: 'No Route Found',
+                description: 'No routes could be found for the selected locations.',
+            });
+        }
+      });
 
   // Cleanup function to clear renderers when component unmounts or deps change
   return () => {
     directionsRenderers.forEach(r => r.setMap(null));
   };
 
-  }, [directionsService, route, map, routesLibrary]);
+  }, [directionsService, route, map, routesLibrary, toast]);
 
   return null;
 }
@@ -106,7 +117,7 @@ const MapLegend = () => {
           <span>Safest</span>
         </li>
         <li className="flex items-center gap-2">
-          <Circle className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+          <Circle className="h-4 w-4 text-orange-500 fill-orange-500" />
           <span>Moderate</span>
         </li>
         <li className="flex items-center gap-2">
