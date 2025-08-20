@@ -74,12 +74,12 @@ export default function EmergencyPage() {
         if (primaryContact) {
             // Initiate phone call
             alert(`Initiating call to ${primaryContact.name}...`);
-            window.location.href = `tel:${primaryContact.phone}`;
+            window.location.href = `tel:91${primaryContact.phone}`;
 
             // Share location via WhatsApp
             if (location) {
                 const whatsappMessage = `Emergency! I need help. This is my current location.`;
-                const whatsappUrl = `https://wa.me/${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+                const whatsappUrl = `https://wa.me/91${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
                 alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
                 window.open(whatsappUrl, '_blank');
             } else {
