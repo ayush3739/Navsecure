@@ -16,6 +16,11 @@ type Contact = {
   phone: string;
 };
 
+type Coordinates = {
+    latitude: number;
+    longitude: number;
+} | null;
+
 const initialContacts: Contact[] = [
   { id: 1, name: 'Jane Doe', phone: '9876543210' },
   { id: 2, name: 'John Smith', phone: '8765432109' },
@@ -25,6 +30,8 @@ export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentContact, setCurrentContact] = useState<Contact | null>(null);
+  const [location, setLocation] = useState<Coordinates>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -39,6 +46,22 @@ export default function ContactsPage() {
     } catch (error) {
       console.error("Could not access localStorage", error);
       setContacts(initialContacts);
+    }
+     if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLocation({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+                setLocationError(null);
+            },
+            (error) => {
+                setLocationError(`Location Error: ${error.message}`);
+            }
+        );
+    } else {
+        setLocationError("Geolocation is not supported by this browser.");
     }
   }, []);
 
@@ -81,9 +104,28 @@ export default function ContactsPage() {
   const handleDelete = (id: number) => {
     updateContacts(contacts.filter(c => c.id !== id));
   };
+    
+  const handleSosActivate = () => {
+        const primaryContact = contacts[0];
+        if (primaryContact) {
+            alert(`Initiating call to ${primaryContact.name}...`);
+            window.location.href = `tel:91${primaryContact.phone}`;
+
+            if (location) {
+                const whatsappMessage = `Emergency! I need help. This is my current location.`;
+                const whatsappUrl = `https://wa.me/91${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+                alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
+                window.open(whatsappUrl, '_blank');
+            } else {
+                 alert(`Could not get your location to share. ${locationError || ''}`);
+            }
+        } else {
+             alert(`Sharing live location with emergency services.`);
+        }
+    };
 
   return (
-    <MainLayout>
+    <MainLayout onSosActivate={handleSosActivate}>
       <div className="p-6 md:p-8 space-y-6">
         <header className="space-y-4">
             <div className='flex items-center gap-3'>

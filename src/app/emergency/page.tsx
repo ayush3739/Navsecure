@@ -104,7 +104,7 @@ export default function EmergencyPage() {
     
   return (
     <APIProvider apiKey={apiKey}>
-        <MainLayout>
+        <MainLayout onSosActivate={handleSosActivate}>
         <div className="p-6 md:p-8 space-y-6">
             <header className="flex items-center gap-3">
             <AlertTriangle className="w-8 h-8 text-destructive" />

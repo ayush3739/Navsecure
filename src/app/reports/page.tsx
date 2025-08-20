@@ -29,7 +29,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { IncidentReportForm } from '@/components/incident-report-form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
 type Report = {
@@ -40,6 +40,11 @@ type Report = {
   date: string;
   status: 'Received' | 'In Review' | 'Resolved';
 };
+
+type Coordinates = {
+    latitude: number;
+    longitude: number;
+} | null;
 
 const mockReports: Report[] = [
     {
@@ -93,7 +98,28 @@ const getStatusBadgeVariant = (status: Report['status']) => {
 export default function ReportsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [reports, setReports] = useState<Report[]>(mockReports);
+  const [location, setLocation] = useState<Coordinates>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                    setLocationError(null);
+                },
+                (error) => {
+                    setLocationError(`Location Error: ${error.message}`);
+                }
+            );
+        } else {
+            setLocationError("Geolocation is not supported by this browser.");
+        }
+    }, []);
 
     if (!apiKey) {
         return (
@@ -118,12 +144,43 @@ export default function ReportsPage() {
     setReports(prevReports => [newReport, ...prevReports]);
     setIsSheetOpen(false);
   };
+    
+   const handleSosActivate = () => {
+        let primaryContact = null;
+        try {
+            const storedContacts = localStorage.getItem('emergencyContacts');
+            if (storedContacts) {
+                const contacts = JSON.parse(storedContacts);
+                if (contacts.length > 0) {
+                    primaryContact = contacts[0];
+                }
+            }
+        } catch (error) {
+            console.error("Could not access localStorage or parse contacts", error);
+        }
+
+        if (primaryContact) {
+            alert(`Initiating call to ${primaryContact.name}...`);
+            window.location.href = `tel:91${primaryContact.phone}`;
+
+            if (location) {
+                const whatsappMessage = `Emergency! I need help. This is my current location.`;
+                const whatsappUrl = `https://wa.me/91${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+                alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
+                window.open(whatsappUrl, '_blank');
+            } else {
+                 alert(`Could not get your location to share. ${locationError || ''}`);
+            }
+        } else {
+             alert(`Sharing live location with emergency services.`);
+        }
+    };
 
 
   return (
     <APIProvider apiKey={apiKey}>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <MainLayout>
+        <MainLayout onSosActivate={handleSosActivate}>
           <div className="p-6 md:p-8 space-y-6">
             <header className="flex items-center justify-between gap-3">
               <div className='flex items-center gap-3'>
