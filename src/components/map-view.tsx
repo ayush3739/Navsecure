@@ -19,30 +19,24 @@ type MapViewProps = {
   } | null;
 };
 
-const getRouteColor = (score: number) => {
-  if (score > 75) return 'hsl(120, 100%, 35%)'; // A vibrant green
-  if (score > 40) return 'hsl(48, 100%, 50%)'; // A clear yellow
-  return 'hsl(0, 100%, 50%)'; // A distinct red
-};
-
 const Directions = ({ route }: MapViewProps) => {
   const map = useMap();
   const routesLibrary = useMapsLibrary('routes');
   const [directionsService, setDirectionsService] = useState<google.maps.DirectionsService>();
-  const [directionsRenderers, setDirectionsRenderers] = useState<google.maps.DirectionsRenderer[]>([]);
+  const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer>();
   
   useEffect(() => {
     if (!routesLibrary || !map) return;
     setDirectionsService(new routesLibrary.DirectionsService());
+    setDirectionsRenderer(new routesLibrary.DirectionsRenderer({ map }));
   }, [routesLibrary, map]);
 
   useEffect(() => {
-    // Clear existing renderers
-    directionsRenderers.forEach(renderer => renderer.setMap(null));
-    setDirectionsRenderers([]);
-
-    if (!directionsService || !map || !route) {
-      return;
+    if (!directionsService || !directionsRenderer || !route) {
+        if(directionsRenderer) {
+            directionsRenderer.set('directions', null);
+        }
+        return;
     }
 
     directionsService
@@ -50,29 +44,12 @@ const Directions = ({ route }: MapViewProps) => {
         origin: route.from,
         destination: route.to,
         travelMode: google.maps.TravelMode.DRIVING,
-        provideRouteAlternatives: true,
       })
       .then(response => {
-        const newRenderers = response.routes.map((r, index) => {
-          const routeAnalysis = route.allRoutes[index];
-          const isSafest = index === route.safestRouteIndex;
-          
-          const renderer = new google.maps.DirectionsRenderer({
-            map,
-            directions: { ...response, routes: [r] }, // Render one route per renderer
-            routeIndex: 0, // We are only passing one route to each renderer
-            polylineOptions: {
-              strokeColor: getRouteColor(routeAnalysis?.safetyScore ?? 0),
-              strokeOpacity: isSafest ? 1.0 : 0.8,
-              strokeWeight: isSafest ? 8 : 6,
-            },
-          });
-          return renderer;
-        });
-        setDirectionsRenderers(newRenderers);
+        directionsRenderer.setDirections(response);
       });
 
-  }, [directionsService, map, route]);
+  }, [directionsService, directionsRenderer, route]);
 
 
   return null;
