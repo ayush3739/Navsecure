@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -145,7 +146,6 @@ const SidebarProvider = React.forwardRef<
               className
             )}
             ref={ref}
-            {...props}
           >
             {children}
           </div>
