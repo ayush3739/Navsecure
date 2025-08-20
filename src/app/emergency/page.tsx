@@ -17,12 +17,43 @@ type Contact = {
   phone: string;
 };
 
+type Coordinates = {
+    latitude: number;
+    longitude: number;
+} | null;
+
 
 export default function EmergencyPage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     const [primaryContact, setPrimaryContact] = useState<Contact | null>(null);
     const [alertSent, setAlertSent] = useState(false);
     const [isLocationEnabled, setIsLocationEnabled] = useState(true);
+    const [location, setLocation] = useState<Coordinates>(null);
+    const [locationError, setLocationError] = useState<string | null>(null);
+
+     useEffect(() => {
+        if (isLocationEnabled) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        setLocation({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        });
+                        setLocationError(null);
+                    },
+                    (error) => {
+                        setLocationError(`Location Error: ${error.message}`);
+                    }
+                );
+            } else {
+                setLocationError("Geolocation is not supported by this browser.");
+            }
+        } else {
+            setLocation(null);
+            setLocationError("Location sharing is disabled.");
+        }
+    }, [isLocationEnabled]);
 
     useEffect(() => {
         try {
@@ -38,15 +69,27 @@ export default function EmergencyPage() {
         }
     }, []);
 
-    useEffect(() => {
-        if (alertSent && primaryContact) {
-            // Simulate sharing location and calling contact
-            alert(`Sharing live location with ${primaryContact.name}.`);
-            alert(`Calling ${primaryContact.name} at ${primaryContact.phone}.`);
-        } else if (alertSent) {
+    const handleSosActivate = () => {
+        setAlertSent(true);
+        if (primaryContact) {
+            // Initiate phone call
+            alert(`Initiating call to ${primaryContact.name}...`);
+            window.location.href = `tel:${primaryContact.phone}`;
+
+            // Share location via WhatsApp
+            if (location) {
+                const whatsappMessage = `Emergency! I need help. This is my current location.`;
+                const whatsappUrl = `https://wa.me/${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+                alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
+                window.open(whatsappUrl, '_blank');
+            } else {
+                 alert("Could not get your location to share.");
+            }
+
+        } else {
              alert(`Sharing live location with emergency services.`);
         }
-    }, [alertSent, primaryContact]);
+    }
 
     if (!apiKey) {
         return (
@@ -83,7 +126,7 @@ export default function EmergencyPage() {
                     </div>
                 ) : (
                     <>
-                        <SOSButton onActivate={() => setAlertSent(true)} />
+                        <SOSButton onActivate={handleSosActivate} />
                         <p className="text-muted-foreground mt-6">
                             Press and hold for 3 seconds to activate emergency alert
                         </p>
@@ -104,6 +147,7 @@ export default function EmergencyPage() {
                             </Label>
                             <Switch id="location-switch" checked={isLocationEnabled} onCheckedChange={setIsLocationEnabled} />
                         </div>
+                        {locationError && <p className="text-xs text-destructive mt-2">{locationError}</p>}
                     </CardContent>
                 </Card>
                 <Card>
@@ -127,7 +171,7 @@ export default function EmergencyPage() {
                 <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                     <Info className="w-6 h-6 text-primary" />
                     <CardTitle className="text-xl">Safety Tips</CardTitle>
-                </CardHeader>
+                </Header>
                 <CardContent>
                     <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                     <li>Always inform someone about your travel plans</li>
