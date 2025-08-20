@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useRef, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Search, Loader2 } from 'lucide-react';
 import { getSafetyScoreAction } from '@/app/actions';
 import type { ActionState, SafetyScoreResult } from '@/lib/types';
@@ -39,7 +39,7 @@ export function RoutePlanner({ onScoreGenerated }: RoutePlannerProps) {
   const formRef = useRef<HTMLFormElement>(null);
   
   const initialState: ActionState = null;
-  const [state, formAction] = useFormState(getSafetyScoreAction, initialState);
+  const [state, formAction] = useActionState(getSafetyScoreAction, initialState);
 
   useEffect(() => {
     if (state?.result) {
