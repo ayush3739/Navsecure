@@ -13,6 +13,7 @@ type MapViewProps = {
   route: {
     from: string;
     to: string;
+    safestRouteIndex?: number;
   } | null;
 };
 
@@ -20,21 +21,19 @@ const Directions = ({ route }: MapViewProps) => {
   const map = useMap();
   const routesLibrary = useMapsLibrary('routes');
   const [directionsService, setDirectionsService] = useState<google.maps.DirectionsService>();
-  const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer>();
-  const [routes, setRoutes] = useState<google.maps.DirectionsRoute[]>([]);
-
+  const [directionsRenderers, setDirectionsRenderers] = useState<google.maps.DirectionsRenderer[]>([]);
+  
   useEffect(() => {
     if (!routesLibrary || !map) return;
     setDirectionsService(new routesLibrary.DirectionsService());
-    setDirectionsRenderer(new routesLibrary.DirectionsRenderer({ map }));
   }, [routesLibrary, map]);
 
   useEffect(() => {
-    if (!directionsService || !directionsRenderer || !route) {
-      // Clear previous routes when route is null
-      if (directionsRenderer) {
-        directionsRenderer.setDirections({ routes: [] });
-      }
+    // Clear existing renderers
+    directionsRenderers.forEach(renderer => renderer.setMap(null));
+    setDirectionsRenderers([]);
+
+    if (!directionsService || !map || !route) {
       return;
     }
 
@@ -46,16 +45,28 @@ const Directions = ({ route }: MapViewProps) => {
         provideRouteAlternatives: true,
       })
       .then(response => {
-        directionsRenderer.setDirections(response);
-        setRoutes(response.routes);
+        const newRenderers = response.routes.map((r, index) => {
+          const isSafest = index === route.safestRouteIndex;
+          const renderer = new google.maps.DirectionsRenderer({
+            map,
+            directions: { ...response, routes: [r] }, // Render one route per renderer
+            routeIndex: 0, // We are only passing one route to each renderer
+            polylineOptions: {
+              strokeColor: isSafest ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))',
+              strokeOpacity: isSafest ? 1.0 : 0.7,
+              strokeWeight: isSafest ? 8 : 6,
+            },
+          });
+          return renderer;
+        });
+        setDirectionsRenderers(newRenderers);
       });
 
-  }, [directionsService, directionsRenderer, route]);
+  }, [directionsService, map, route]);
 
 
   return null;
 }
-
 
 export function MapView({ route }: MapViewProps) {
   const position = { lat: 28.6139, lng: 77.2090 }; // Delhi

@@ -3,6 +3,7 @@ export type SafetyScoreResult = {
   highlights: string[];
   from?: string;
   to?: string;
+  safestRouteIndex?: number;
 };
 
 export type ActionState = {

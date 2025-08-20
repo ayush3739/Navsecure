@@ -156,7 +156,7 @@ export default function DashboardPage() {
 
   return (
     <APIProvider apiKey={apiKey} libraries={['places', 'routes']}>
-      <div className="flex h-dvh overflow-hidden bg-background font-body">
+      <div className="flex h-dvh bg-background font-body">
         <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
           <ScrollArea className="h-full">
             <div className="p-6 space-y-6">
@@ -170,7 +170,7 @@ export default function DashboardPage() {
           </ScrollArea>
         </aside>
         <main className="flex-1 relative">
-          <MapView route={safetyResult ? { from: safetyResult.from, to: safetyResult.to } : null} />
+          <MapView route={safetyResult ? { from: safetyResult.from, to: safetyResult.to, safestRouteIndex: safetyResult.safestRouteIndex } : null} />
           <div className="absolute top-4 right-4 flex gap-2">
             <Sheet>
               <SheetTrigger asChild>

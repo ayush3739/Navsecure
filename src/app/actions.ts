@@ -28,16 +28,29 @@ export async function getSafetyScoreAction(
   const { from, to } = validationResult.data;
 
   try {
-    const routeData = `A route from "${from}" to "${to}" during the evening.`;
-    const availableDatasets = ['City Crime Statistics (2023)', 'Public Lighting Grid', 'Real-time Traffic Data', 'Safe Spot Locations'];
+    // In a real app, you'd get multiple route options from the Maps API first,
+    // then send them to the AI to be scored.
+    // For this demo, we'll simulate scoring 3 potential routes.
+    const routeAnalyses = await Promise.all([
+      generateSafetyScore({ routeData: `Route 1 from "${from}" to "${to}"`, availableDatasets: ['Crime Stats', 'Lighting'] }),
+      generateSafetyScore({ routeData: `Route 2 from "${from}" to "${to}"`, availableDatasets: ['Crime Stats', 'Lighting'] }),
+      generateSafetyScore({ routeData: `Route 3 from "${from}" to "${to}"`, availableDatasets: ['Crime Stats', 'Lighting'] }),
+    ]);
 
-    const safetyScoreResult = await generateSafetyScore({
-      routeData,
-      availableDatasets,
+    // Find the route with the highest safety score
+    let safestRouteIndex = 0;
+    let highestScore = -1;
+    routeAnalyses.forEach((result, index) => {
+      if (result.safetyScore > highestScore) {
+        highestScore = result.safetyScore;
+        safestRouteIndex = index;
+      }
     });
+
+    const safetyScoreResult = routeAnalyses[safestRouteIndex];
     
     // We are returning the from/to here so the map can use it to render the route
-    return { result: { ...safetyScoreResult, from, to } };
+    return { result: { ...safetyScoreResult, from, to, safestRouteIndex } };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to generate safety score. Please try again.' };
