@@ -167,7 +167,7 @@ const SafeSpotsList = ({ result }: { result: SafetyScoreResult | null }) => {
   );
 };
 
-type Contact = { id: string; name: string; relation: string; };
+type Contact = { id: string; name: string; phone: string; };
 
 const EmergencyContactForm = ({
   onSave,
@@ -177,15 +177,15 @@ const EmergencyContactForm = ({
   contact?: Contact | null;
 }) => {
   const [name, setName] = useState(contact?.name || '');
-  const [relation, setRelation] = useState(contact?.relation || '');
+  const [phone, setPhone] = useState(contact?.phone || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name && relation) {
+    if (name && phone) {
       onSave({
         id: contact?.id || Date.now().toString(),
         name,
-        relation,
+        phone,
       });
     }
   };
@@ -197,8 +197,13 @@ const EmergencyContactForm = ({
         <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Jane Doe" required />
       </div>
       <div>
-        <Label htmlFor="relation">Relation</Label>
-        <Input id="relation" value={relation} onChange={(e) => setRelation(e.target.value)} placeholder="e.g., Sister" required />
+        <Label htmlFor="phone">Phone Number</Label>
+        <div className="flex items-center">
+          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-secondary text-sm text-muted-foreground">
+            +91
+          </span>
+          <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="9876543210" required className="rounded-l-none" />
+        </div>
       </div>
       <DialogFooter>
         <DialogClose asChild>
@@ -213,8 +218,8 @@ const EmergencyContactForm = ({
 
 const EmergencyContacts = () => {
   const [contacts, setContacts] = useState<Contact[]>([
-    { id: '1', name: 'Jane Doe', relation: 'Sister' },
-    { id: '2', name: 'John Smith', relation: 'Friend' },
+    { id: '1', name: 'Jane Doe', phone: '9876543210' },
+    { id: '2', name: 'John Smith', phone: '9988776655' },
   ]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
@@ -266,7 +271,7 @@ const EmergencyContacts = () => {
             <li key={contact.id} className="flex justify-between items-center group">
               <div>
                 <p className="font-medium">{contact.name}</p>
-                <p className="text-sm text-muted-foreground">{contact.relation}</p>
+                <p className="text-sm text-muted-foreground">+91 {contact.phone}</p>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(contact)}>
