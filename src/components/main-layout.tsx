@@ -141,7 +141,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 </main>
             </div>
              <div className="absolute bottom-4 right-4 z-20">
-                <SOSButton onAlertSent={() => {}} />
+                <SOSButton onActivate={() => {}} />
             </div>
         </div>
     </SidebarProvider>
