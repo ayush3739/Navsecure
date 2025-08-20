@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,9 +22,34 @@ const initialContacts: Contact[] = [
 ];
 
 export default function ContactsPage() {
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentContact, setCurrentContact] = useState<Contact | null>(null);
+
+  useEffect(() => {
+    try {
+      const storedContacts = localStorage.getItem('emergencyContacts');
+      if (storedContacts) {
+        setContacts(JSON.parse(storedContacts));
+      } else {
+        // If no contacts in storage, use initial and save them
+        setContacts(initialContacts);
+        localStorage.setItem('emergencyContacts', JSON.stringify(initialContacts));
+      }
+    } catch (error) {
+      console.error("Could not access localStorage", error);
+      setContacts(initialContacts);
+    }
+  }, []);
+
+  const updateContacts = (newContacts: Contact[]) => {
+    setContacts(newContacts);
+    try {
+        localStorage.setItem('emergencyContacts', JSON.stringify(newContacts));
+    } catch (error) {
+        console.error("Could not access localStorage", error);
+    }
+  };
 
   const handleSaveContact = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,10 +59,10 @@ export default function ContactsPage() {
 
     if (currentContact) {
       // Editing existing contact
-      setContacts(contacts.map(c => c.id === currentContact.id ? { ...c, name, phone } : c));
+      updateContacts(contacts.map(c => c.id === currentContact.id ? { ...c, name, phone } : c));
     } else {
       // Adding new contact
-      setContacts([...contacts, { id: Date.now(), name, phone }]);
+      updateContacts([...contacts, { id: Date.now(), name, phone }]);
     }
     setIsDialogOpen(false);
     setCurrentContact(null);
@@ -54,7 +79,7 @@ export default function ContactsPage() {
   };
 
   const handleDelete = (id: number) => {
-    setContacts(contacts.filter(c => c.id !== id));
+    updateContacts(contacts.filter(c => c.id !== id));
   };
 
   return (

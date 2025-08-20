@@ -5,17 +5,38 @@ import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone, MapPin, Info, ShieldCheck, LocateFixed } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { SOSButton } from '@/components/sos-button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
+type Contact = {
+  id: number;
+  name: string;
+  phone: string;
+};
+
+
 export default function EmergencyPage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    const [primaryContact, setPrimaryContact] = useState({ name: 'Jane Doe', phone: '9876543210' });
+    const [primaryContact, setPrimaryContact] = useState<Contact | null>(null);
     const [alertSent, setAlertSent] = useState(false);
     const [isLocationEnabled, setIsLocationEnabled] = useState(true);
+
+    useEffect(() => {
+        try {
+            const storedContacts = localStorage.getItem('emergencyContacts');
+            if (storedContacts) {
+                const contacts: Contact[] = JSON.parse(storedContacts);
+                if (contacts.length > 0) {
+                    setPrimaryContact(contacts[0]);
+                }
+            }
+        } catch (error) {
+            console.error("Could not access localStorage or parse contacts", error);
+        }
+    }, []);
 
     if (!apiKey) {
         return (
@@ -81,9 +102,13 @@ export default function EmergencyPage() {
                     <CardTitle className="text-xl">Quick Call</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <a href={`tel:${primaryContact.phone}`}>
-                            <Button className="w-full">Call {primaryContact.name}</Button>
-                        </a>
+                        {primaryContact ? (
+                            <a href={`tel:${primaryContact.phone}`}>
+                                <Button className="w-full">Call {primaryContact.name}</Button>
+                            </a>
+                        ) : (
+                            <Button className="w-full" disabled>Add a contact first</Button>
+                        )}
                     </CardContent>
                 </Card>
             </div>
