@@ -69,7 +69,7 @@ const Directions = ({ route }: MapViewProps) => {
 
             if (googleRoute) {
                 const color = routeColors[ourIndex] || routeColors[routeColors.length - 1];
-                const renderer = new routesLibrary.DirectionsRenderer({
+                const renderer = new (routesLibrary.DirectionsRenderer)({
                     map,
                     directions: response,
                     routeIndex: googleRouteIndex,
@@ -78,6 +78,7 @@ const Directions = ({ route }: MapViewProps) => {
                     strokeOpacity: ourIndex === 0 ? 1.0 : 0.8,
                     strokeWeight: ourIndex === 0 ? 8 : 6,
                     },
+                    suppressMarkers: true,
                 });
                 newRenderers.push(renderer);
             }
@@ -151,16 +152,21 @@ const DynamicSafeSpots = () => {
       const location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
       
       const keywords = ['police', 'hospital', "women's shelter"];
+
+      const searchPromises = keywords.map(keyword => {
+        return new Promise<google.maps.places.PlaceResult[]>((resolve) => {
+          placesService.nearbySearch({ location, radius: 5000, keyword }, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+              resolve(results);
+            } else {
+              resolve([]);
+            }
+          });
+        });
+      });
       
-      Promise.all(keywords.map(keyword => 
-        placesService.nearbySearch({ location, radius: 5000, keyword }, (results, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            return results;
-          }
-          return [];
-        })
-      )).then(resultsArrays => {
-        const allSpots = resultsArrays.flat();
+      Promise.all(searchPromises).then(resultsArrays => {
+        const allSpots = resultsArrays.flat().filter(spot => spot.geometry && spot.geometry.location);
         setSafeSpots(allSpots.slice(0, 10)); // Limit to 10 spots for performance
       });
     });
@@ -175,11 +181,13 @@ const DynamicSafeSpots = () => {
   return (
     <>
       {safeSpots.map((spot) => (
-        spot.geometry?.location && <AdvancedMarker key={spot.place_id} position={spot.geometry.location} title={spot.name}>
-          <div className='p-2 bg-card rounded-full shadow-lg'>
-            {getIcon(spot.types)}
-          </div>
-        </AdvancedMarker>
+        spot.geometry?.location && (
+          <AdvancedMarker key={spot.place_id} position={spot.geometry.location} title={spot.name}>
+            <div className='p-2 bg-card rounded-full shadow-lg'>
+              {getIcon(spot.types)}
+            </div>
+          </AdvancedMarker>
+        )
       ))}
     </>
   );
