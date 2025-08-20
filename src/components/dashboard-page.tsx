@@ -30,7 +30,6 @@ import { Badge } from '@/components/ui/badge';
 
 import { RoutePlanner } from './route-planner';
 import { MapView } from './map-view';
-import { cn } from '@/lib/utils';
 
 const AppHeader = () => (
   <div className="flex items-center gap-3">
@@ -202,7 +201,7 @@ export default function DashboardPage() {
           </ScrollArea>
         </aside>
         <main className="flex-1 relative">
-          <MapView route={safetyResult ? { from: safetyResult.from, to: safetyResult.to, safestRouteIndex: safetyResult.safestRouteIndex } : null} />
+          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, safestRouteIndex: safetyResult.safestRouteIndex, allRoutes: safetyResult.allRoutes } : null} />
           <div className="absolute top-4 right-4 flex gap-2">
             <Sheet>
               <SheetTrigger asChild>
@@ -217,7 +216,7 @@ export default function DashboardPage() {
                   <SheetDescription>
                     Your report helps us improve safety data for everyone. Describe what you're observing.
                   </SheetDescription>
-                </SheetHeader>
+                </Header>
                 <div className="py-4">
                   {/* Reporting form could go here */}
                   <p className="text-sm text-muted-foreground">Live reporting form coming soon.</p>

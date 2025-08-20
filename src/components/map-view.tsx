@@ -8,13 +8,21 @@ import {
 } from '@vis.gl/react-google-maps';
 import { Hospital, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { SafetyScoreResult } from '@/lib/types';
 
 type MapViewProps = {
   route: {
     from: string;
     to: string;
     safestRouteIndex?: number;
+    allRoutes: SafetyScoreResult['allRoutes'];
   } | null;
+};
+
+const getRouteColor = (score: number) => {
+  if (score > 75) return 'hsl(120, 100%, 35%)'; // A vibrant green
+  if (score > 40) return 'hsl(48, 100%, 50%)'; // A clear yellow
+  return 'hsl(0, 100%, 50%)'; // A distinct red
 };
 
 const Directions = ({ route }: MapViewProps) => {
@@ -46,14 +54,16 @@ const Directions = ({ route }: MapViewProps) => {
       })
       .then(response => {
         const newRenderers = response.routes.map((r, index) => {
+          const routeAnalysis = route.allRoutes[index];
           const isSafest = index === route.safestRouteIndex;
+          
           const renderer = new google.maps.DirectionsRenderer({
             map,
             directions: { ...response, routes: [r] }, // Render one route per renderer
             routeIndex: 0, // We are only passing one route to each renderer
             polylineOptions: {
-              strokeColor: isSafest ? 'hsl(142.1 76.2% 36.3%)' : 'hsl(var(--secondary-foreground))', // green-600 for safest
-              strokeOpacity: isSafest ? 1.0 : 0.7,
+              strokeColor: getRouteColor(routeAnalysis?.safetyScore ?? 0),
+              strokeOpacity: isSafest ? 1.0 : 0.8,
               strokeWeight: isSafest ? 8 : 6,
             },
           });
