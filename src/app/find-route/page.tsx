@@ -239,6 +239,18 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
 const CurrentLocationControl = () => {
   const map = useMap();
   const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  const [photo, setPhoto] = useState('https://placehold.co/100x100.png');
+
+  useEffect(() => {
+    try {
+        const storedPhoto = localStorage.getItem('userPhoto');
+        if (storedPhoto) {
+            setPhoto(storedPhoto);
+        }
+    } catch (error) {
+        console.error("Could not access localStorage", error);
+    }
+  }, []);
 
   const handleLocateClick = useCallback(() => {
     if (navigator.geolocation) {
@@ -269,7 +281,7 @@ const CurrentLocationControl = () => {
       {currentPosition && (
         <AdvancedMarker position={currentPosition} title="You are here">
            <Avatar className="h-8 w-8 border-2 border-primary shadow-lg">
-                <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
+                <AvatarImage src={photo} alt="User" data-ai-hint="user avatar" />
                 <AvatarFallback>U</AvatarFallback>
             </Avatar>
         </AdvancedMarker>
@@ -371,7 +383,12 @@ export default function FindRoutePage() {
         </div>
 
          <div className="absolute bottom-4 right-4 z-20">
-            <SOSButton onActivate={() => {}} />
+            <SOSButton onActivate={() => {
+                // In a real app, this would trigger the emergency sequence.
+                // For the find-route page, we can just log it for now.
+                console.log("SOS Activated from Find Route page");
+                alert("SOS Activated!");
+            }} />
         </div>
       </div>
     </APIProvider>
