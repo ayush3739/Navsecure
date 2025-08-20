@@ -83,7 +83,7 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h3 className="font-semibold mb-2">{displayedRoute.originalIndex === result.allRoutes[0].originalIndex ? 'Safest Route' : `Alternative ${result.allRoutes.findIndex(r => r.originalIndex === displayedRoute.originalIndex)}`}</h3>
+          <h3 className="font-semibold mb-2">{displayedRoute.originalIndex === result.allRoutes[0].originalIndex ? 'Safest Route' : `Alternative Route`}</h3>
           <div className="flex items-center justify-between">
             <span className="font-medium">Safety Score</span>
             <span className="text-2xl font-bold text-primary">{displayedRoute.safetyScore}/100</span>
@@ -112,9 +112,9 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
             <h3 className="font-semibold mb-2">Other Routes</h3>
             <ul className="space-y-3">
               {alternativeRoutes.map((route) => (
-                <li key={route.originalIndex} onClick={() => setSelectedRoute(route)} className="cursor-pointer">
+                <li key={route.originalIndex} onClick={() => setSelectedRoute(route)} className="cursor-pointer p-2 rounded-md hover:bg-muted">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">Alternative {result.allRoutes.findIndex(r => r.originalIndex === route.originalIndex)}</span>
+                    <span className="font-medium text-muted-foreground">Alternative Route</span>
                     <span className="font-bold">{route.safetyScore}/100</span>
                   </div>
                   <div className="w-full bg-secondary rounded-full h-2.5 mt-1">

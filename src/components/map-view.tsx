@@ -52,25 +52,37 @@ const Directions = ({ route }: MapViewProps) => {
       })
       .then(response => {
         const newRenderers: google.maps.DirectionsRenderer[] = [];
+        
         // The safest route is green, second is orange, third is red.
         const routeColors = ['#16A34A', '#F97316', '#DC2626'];
 
-        response.routes.slice(0, 3).forEach((r, i) => {
-          // Since allRoutes is sorted from safest to least safe, we can use the index directly.
-          const color = routeColors[i] || routeColors[routeColors.length -1];
-          
-          const renderer = new routesLibrary.DirectionsRenderer({
-            map,
-            directions: response,
-            routeIndex: i,
-            polylineOptions: {
-              strokeColor: color,
-              strokeOpacity: i === 0 ? 1.0 : 0.8, // Highlight safest route
-              strokeWeight: i === 0 ? 8 : 6,
-            },
-          });
-          newRenderers.push(renderer);
+        const sortedGoogleRoutes = [...response.routes];
+        
+        // Match our sorted routes with google's routes before rendering
+        const ourSortedRoutes = route.allRoutes;
+
+        ourSortedRoutes.forEach((ourRoute, ourIndex) => {
+            // Find the corresponding google route. This is a simplification.
+            // A more robust solution might compare route geometry.
+            const googleRouteIndex = ourRoute.originalIndex;
+            const googleRoute = sortedGoogleRoutes[googleRouteIndex];
+
+            if (googleRoute) {
+                const color = routeColors[ourIndex] || routeColors[routeColors.length - 1];
+                const renderer = new routesLibrary.DirectionsRenderer({
+                    map,
+                    directions: response,
+                    routeIndex: googleRouteIndex,
+                    polylineOptions: {
+                    strokeColor: color,
+                    strokeOpacity: ourIndex === 0 ? 1.0 : 0.8,
+                    strokeWeight: ourIndex === 0 ? 8 : 6,
+                    },
+                });
+                newRenderers.push(renderer);
+            }
         });
+        
         setDirectionsRenderers(newRenderers);
       }).catch(e => console.error('Directions request failed', e));
 
@@ -91,11 +103,11 @@ const MapLegend = () => {
       <ul className="space-y-2 text-sm">
         <li className="flex items-center gap-2">
           <Circle className="h-4 w-4 text-green-500 fill-green-500" />
-          <span>Very Safe</span>
+          <span>Safest</span>
         </li>
         <li className="flex items-center gap-2">
           <Circle className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-          <span>Moderately Safe</span>
+          <span>Moderate</span>
         </li>
         <li className="flex items-center gap-2">
           <Circle className="h-4 w-4 text-red-500 fill-red-500" />
