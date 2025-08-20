@@ -42,6 +42,13 @@ const PlaceAutocomplete = ({ name, placeholder, error }: { name: string, placeho
       fields: ['formatted_address', 'geometry', 'name'],
     });
 
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (inputRef.current && place.formatted_address) {
+        inputRef.current.value = place.formatted_address;
+      }
+    });
+
   }, [places]);
 
   return (

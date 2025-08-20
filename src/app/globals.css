@@ -56,4 +56,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  .pac-container {
+      @apply z-[9999] rounded-md border bg-popover p-1 text-popover-foreground shadow-md;
+  }
+  .pac-item {
+      @apply cursor-pointer rounded-sm p-2 text-sm;
+  }
+  .pac-item:hover {
+      @apply bg-accent;
+  }
+  .pac-item-query {
+      @apply text-sm font-medium;
+  }
 }
