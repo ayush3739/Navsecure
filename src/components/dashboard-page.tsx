@@ -216,11 +216,7 @@ const EmergencyContactForm = ({
 };
 
 
-const EmergencyContacts = () => {
-  const [contacts, setContacts] = useState<Contact[]>([
-    { id: '1', name: 'Jane Doe', phone: '9876543210' },
-    { id: '2', name: 'John Smith', phone: '9988776655' },
-  ]);
+const EmergencyContacts = ({ contacts, setContacts }: { contacts: Contact[], setContacts: React.Dispatch<React.SetStateAction<Contact[]>>}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
@@ -375,9 +371,47 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
   )
 }
 
+const SOSDialog = ({ contacts }: { contacts: Contact[] }) => {
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle className="text-center text-2xl text-destructive">EMERGENCY</DialogTitle>
+        <DialogDescription className="text-center">
+          Choose a contact to call immediately.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="py-4 space-y-3">
+        {contacts.length > 0 ? (
+          contacts.map(contact => (
+            <a key={contact.id} href={`tel:+91${contact.phone}`} className="block">
+              <Button variant="destructive" className="w-full h-14 text-lg justify-between">
+                <span>Call {contact.name}</span>
+                <Phone />
+              </Button>
+            </a>
+          ))
+        ) : (
+          <p className="text-center text-muted-foreground">
+            You have no emergency contacts. Please add one.
+          </p>
+        )}
+      </div>
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button type="button" variant="secondary" className="w-full">Cancel</Button>
+        </DialogClose>
+      </DialogFooter>
+    </DialogContent>
+  )
+}
+
 export default function DashboardPage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [contacts, setContacts] = useState<Contact[]>([
+    { id: '1', name: 'Jane Doe', phone: '9876543210' },
+    { id: '2', name: 'John Smith', phone: '9988776655' },
+  ]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -403,7 +437,7 @@ export default function DashboardPage() {
               <RoutePlanner onScoreGenerated={setSafetyResult} />
               {safetyResult && <SafetyScoreCard result={safetyResult} />}
               <SafeSpotsList result={safetyResult} />
-              <EmergencyContacts />
+              <EmergencyContacts contacts={contacts} setContacts={setContacts} />
             </div>
           </ScrollArea>
         </aside>
@@ -427,12 +461,18 @@ export default function DashboardPage() {
                 <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
               </SheetContent>
             </Sheet>
-            <Button variant="destructive" className="font-bold shadow-lg animate-pulse">
-              SOS
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="font-bold shadow-lg animate-pulse">
+                  SOS
+                </Button>
+              </DialogTrigger>
+              <SOSDialog contacts={contacts} />
+            </Dialog>
           </div>
         </main>
       </div>
     </APIProvider>
   );
 }
+
