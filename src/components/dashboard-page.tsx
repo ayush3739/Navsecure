@@ -192,7 +192,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <APIProvider apiKey={apiKey} libraries={['places', 'routes']}>
+    <APIProvider apiKey={apiKey}>
       <div className="flex h-dvh bg-background font-body">
         <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
           <ScrollArea className="h-full">
