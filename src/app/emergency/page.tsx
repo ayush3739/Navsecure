@@ -4,12 +4,13 @@
 import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Phone, MapPin, Info, ShieldCheck, LocateFixed } from 'lucide-react';
+import { AlertTriangle, Phone, Info, ShieldCheck, LocateFixed } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { SOSButton } from '@/components/sos-button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useEmergencySos } from '@/hooks/use-emergency-sos';
 
 type Contact = {
   id: number;
@@ -17,41 +18,15 @@ type Contact = {
   phone: string;
 };
 
-type Coordinates = {
-    latitude: number;
-    longitude: number;
-} | null;
-
-
 export default function EmergencyPage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     const [primaryContact, setPrimaryContact] = useState<Contact | null>(null);
-    const [alertSent, setAlertSent] = useState(false);
     const [isLocationEnabled, setIsLocationEnabled] = useState(true);
-    const [location, setLocation] = useState<Coordinates>(null);
-    const [locationError, setLocationError] = useState<string | null>(null);
+    const { alertSent, handleSosActivate, setAlertSent } = useEmergencySos();
 
      useEffect(() => {
-        if (isLocationEnabled) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        setLocation({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                        });
-                        setLocationError(null);
-                    },
-                    (error) => {
-                        setLocationError(`Location Error: ${error.message}`);
-                    }
-                );
-            } else {
-                setLocationError("Geolocation is not supported by this browser.");
-            }
-        } else {
-            setLocation(null);
-            setLocationError("Location sharing is disabled.");
+        if (!isLocationEnabled) {
+             alert("Location sharing is disabled.");
         }
     }, [isLocationEnabled]);
 
@@ -68,28 +43,6 @@ export default function EmergencyPage() {
             console.error("Could not access localStorage or parse contacts", error);
         }
     }, []);
-
-    const handleSosActivate = () => {
-        setAlertSent(true);
-        if (primaryContact) {
-            // Initiate phone call
-            alert(`Initiating call to ${primaryContact.name}...`);
-            window.location.href = `tel:91${primaryContact.phone}`;
-
-            // Share location via WhatsApp
-            if (location) {
-                const whatsappMessage = `Emergency! I need help. This is my current location.`;
-                const whatsappUrl = `https://wa.me/91${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
-                alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
-                window.open(whatsappUrl, '_blank');
-            } else {
-                 alert("Could not get your location to share.");
-            }
-
-        } else {
-             alert(`Sharing live location with emergency services.`);
-        }
-    }
 
     if (!apiKey) {
         return (
@@ -147,7 +100,6 @@ export default function EmergencyPage() {
                             </Label>
                             <Switch id="location-switch" checked={isLocationEnabled} onCheckedChange={setIsLocationEnabled} />
                         </div>
-                        {locationError && <p className="text-xs text-destructive mt-2">{locationError}</p>}
                     </CardContent>
                 </Card>
                 <Card>

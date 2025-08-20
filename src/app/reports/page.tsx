@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { PlusCircle, FileText } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { IncidentReportForm } from '@/components/incident-report-form';
 import { APIProvider } from '@vis.gl/react-google-maps';
+import { useEmergencySos } from '@/hooks/use-emergency-sos';
 
 type Report = {
   id: string;
@@ -19,18 +20,6 @@ type Report = {
   reason: string;
   status: 'Received' | 'In Review' | 'Resolved';
 };
-
-type Contact = {
-  id: number;
-  name: string;
-  phone: string;
-};
-
-type Coordinates = {
-    latitude: number;
-    longitude: number;
-} | null;
-
 
 const mockReports: Report[] = [
   { id: 'REP-001', date: '2023-10-26', location: 'Main Street Park', reason: 'Poor street lighting', status: 'Resolved' },
@@ -41,59 +30,8 @@ const mockReports: Report[] = [
 export default function ReportsPage() {
   const [reports, setReports] = useState<Report[]>(mockReports);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [primaryContact, setPrimaryContact] = useState<Contact | null>(null);
-  const [location, setLocation] = useState<Coordinates>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  useEffect(() => {
-    try {
-        const storedContacts = localStorage.getItem('emergencyContacts');
-        if (storedContacts) {
-            const contacts: Contact[] = JSON.parse(storedContacts);
-            if (contacts.length > 0) {
-                setPrimaryContact(contacts[0]);
-            }
-        }
-    } catch (error) {
-        console.error("Could not access localStorage or parse contacts", error);
-    }
-    
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                });
-                setLocationError(null);
-            },
-            (error) => {
-                setLocationError(`Location Error: ${error.message}`);
-            }
-        );
-    } else {
-        setLocationError("Geolocation is not supported by this browser.");
-    }
-  }, []);
-
-  const handleSosActivate = () => {
-        if (primaryContact) {
-            alert(`Initiating call to ${primaryContact.name}...`);
-            window.location.href = `tel:91${primaryContact.phone}`;
-
-            if (location) {
-                const whatsappMessage = `Emergency! I need help. This is my current location.`;
-                const whatsappUrl = `https://wa.me/91${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
-                alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
-                window.open(whatsappUrl, '_blank');
-            } else {
-                 alert(`Could not get your location to share. ${locationError || ''}`);
-            }
-        } else {
-             alert(`Sharing live location with emergency services.`);
-        }
-    };
+  const { handleSosActivate } = useEmergencySos();
 
   const handleReportSubmitted = (data: { location: string; reason: string; description: string }) => {
     const newReport: Report = {
