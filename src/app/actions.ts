@@ -46,11 +46,9 @@ export async function getSafetyScoreAction(
         safestRouteIndex = index;
       }
     });
-
-    const safetyScoreResult = routeAnalyses[safestRouteIndex];
     
     // We are returning the from/to here so the map can use it to render the route
-    return { result: { ...safetyScoreResult, from, to, safestRouteIndex } };
+    return { result: { allRoutes: routeAnalyses, from, to, safestRouteIndex } };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to generate safety score. Please try again.' };

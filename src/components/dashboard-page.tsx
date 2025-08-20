@@ -30,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { RoutePlanner } from './route-planner';
 import { MapView } from './map-view';
+import { cn } from '@/lib/utils';
 
 const AppHeader = () => (
   <div className="flex items-center gap-3">
@@ -45,32 +46,63 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
     return 'bg-red-500';
   };
 
+  const safestRoute = result.allRoutes[result.safestRouteIndex!];
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Route Safety Analysis</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="font-medium">Safety Score</span>
-          <span className="text-2xl font-bold text-primary">{result.safetyScore}/100</span>
+        <div>
+          <h3 className="font-semibold mb-2">Safest Route</h3>
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Safety Score</span>
+            <span className="text-2xl font-bold text-primary">{safestRoute.safetyScore}/100</span>
+          </div>
+          <div className="w-full bg-secondary rounded-full h-4 mt-2">
+            <div
+              className={`h-4 rounded-full transition-all duration-500 ${getScoreColor(safestRoute.safetyScore)}`}
+              style={{ width: `${safestRoute.safetyScore}%` }}
+            />
+          </div>
         </div>
-        <div className="w-full bg-secondary rounded-full h-4">
-          <div
-            className={`h-4 rounded-full transition-all duration-500 ${getScoreColor(result.safetyScore)}`}
-            style={{ width: `${result.safetyScore}%` }}
-          />
-        </div>
+
         <div>
           <h4 className="font-semibold mb-2 flex items-center gap-2">
             <Info className="w-5 h-5" />
             Key Highlights:
           </h4>
           <div className="flex flex-wrap gap-2">
-            {result.highlights.map((highlight, index) => (
+            {safestRoute.highlights.map((highlight, index) => (
               <Badge key={index} variant="secondary">{highlight}</Badge>
             ))}
           </div>
+        </div>
+
+        <Separator />
+
+        <div>
+          <h3 className="font-semibold mb-2">Alternative Routes</h3>
+          <ul className="space-y-3">
+            {result.allRoutes.map((route, index) => {
+              if (index === result.safestRouteIndex) return null;
+              return (
+                <li key={index}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-muted-foreground">Route {index + 1}</span>
+                    <span className="font-bold">{route.safetyScore}/100</span>
+                  </div>
+                  <div className="w-full bg-secondary rounded-full h-2.5 mt-1">
+                    <div
+                      className={`h-2.5 rounded-full ${getScoreColor(route.safetyScore)}`}
+                      style={{ width: `${route.safetyScore}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </CardContent>
     </Card>

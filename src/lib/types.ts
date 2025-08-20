@@ -1,6 +1,8 @@
 export type SafetyScoreResult = {
-  safetyScore: number;
-  highlights: string[];
+  allRoutes: {
+    safetyScore: number;
+    highlights: string[];
+  }[];
   from?: string;
   to?: string;
   safestRouteIndex?: number;

@@ -60,7 +60,7 @@
       @apply z-[9999] rounded-md border bg-popover p-1 text-popover-foreground shadow-md;
   }
   .pac-item {
-      @apply cursor-pointer rounded-sm p-2 text-sm text-primary;
+      @apply cursor-pointer rounded-sm p-2 text-sm text-blue-400;
   }
   .pac-item:hover {
       @apply bg-accent;

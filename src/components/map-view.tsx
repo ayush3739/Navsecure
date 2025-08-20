@@ -52,7 +52,7 @@ const Directions = ({ route }: MapViewProps) => {
             directions: { ...response, routes: [r] }, // Render one route per renderer
             routeIndex: 0, // We are only passing one route to each renderer
             polylineOptions: {
-              strokeColor: isSafest ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))',
+              strokeColor: isSafest ? 'hsl(142.1 76.2% 36.3%)' : 'hsl(var(--secondary-foreground))', // green-600 for safest
               strokeOpacity: isSafest ? 1.0 : 0.7,
               strokeWeight: isSafest ? 8 : 6,
             },
