@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, useActionState, useRef } from 'react';
+import { useState, useActionState, useRef } from 'react';
 import type { ActionState, SafetyScoreResult } from '@/lib/types';
 import {
   Shield,
@@ -9,18 +9,14 @@ import {
   Hospital,
   ShieldCheck,
   HeartHandshake,
-  Phone,
   MessageCircleWarning,
   Info,
   Loader2,
   Send,
-  PlusCircle,
-  Trash2,
-  Pencil,
 } from 'lucide-react';
-import { APIProvider } from '@vis.gl/react-google-maps';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { MainLayout } from '@/components/main-layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,37 +26,19 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose
 } from '@/components/ui/sheet';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useFormStatus } from 'react-dom';
 import { submitIncidentReportAction } from '@/app/actions';
 
-import { RoutePlanner } from './route-planner';
-import { MapView } from './map-view';
-
-const AppHeader = () => (
-  <div className="flex items-center gap-3">
-    <Shield className="w-8 h-8 text-primary" />
-    <h1 className="text-2xl font-bold text-foreground">SafeRoute</h1>
-  </div>
-);
+import { RoutePlanner } from '@/components/route-planner';
+import { MapView } from '@/components/map-view';
+import React from 'react';
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0) {
@@ -167,139 +145,6 @@ const SafeSpotsList = ({ result }: { result: SafetyScoreResult | null }) => {
   );
 };
 
-type Contact = { id: string; name: string; phone: string; };
-
-const EmergencyContactForm = ({
-  onSave,
-  contact,
-}: {
-  onSave: (contact: Contact) => void;
-  contact?: Contact | null;
-}) => {
-  const [name, setName] = useState(contact?.name || '');
-  const [phone, setPhone] = useState(contact?.phone || '');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name && phone) {
-      onSave({
-        id: contact?.id || Date.now().toString(),
-        name,
-        phone,
-      });
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Jane Doe" required />
-      </div>
-      <div>
-        <Label htmlFor="phone">Phone Number</Label>
-        <div className="flex items-center">
-          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-secondary text-sm text-muted-foreground">
-            +91
-          </span>
-          <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="9876543210" required className="rounded-l-none" />
-        </div>
-      </div>
-      <DialogFooter>
-        <DialogClose asChild>
-          <Button type="button" variant="secondary">Cancel</Button>
-        </DialogClose>
-        <Button type="submit">Save Contact</Button>
-      </DialogFooter>
-    </form>
-  );
-};
-
-
-const EmergencyContacts = ({ contacts, setContacts }: { contacts: Contact[], setContacts: React.Dispatch<React.SetStateAction<Contact[]>>}) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingContact, setEditingContact] = useState<Contact | null>(null);
-
-  const handleSaveContact = (contact: Contact) => {
-    const existingIndex = contacts.findIndex(c => c.id === contact.id);
-    if (existingIndex > -1) {
-      const updatedContacts = [...contacts];
-      updatedContacts[existingIndex] = contact;
-      setContacts(updatedContacts);
-    } else {
-      setContacts([...contacts, contact]);
-    }
-    setIsDialogOpen(false);
-    setEditingContact(null);
-  };
-
-  const handleEdit = (contact: Contact) => {
-    setEditingContact(contact);
-    setIsDialogOpen(true);
-  };
-
-  const handleAddNew = () => {
-    setEditingContact(null);
-    setIsDialogOpen(true);
-  };
-  
-  const handleDelete = (id: string) => {
-    setContacts(contacts.filter(c => c.id !== id));
-  };
-
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="w-5 h-5 text-primary" />
-            Emergency Contacts
-          </CardTitle>
-          <Button size="sm" variant="ghost" onClick={handleAddNew}>
-            <PlusCircle className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-3">
-          {contacts.map((contact) => (
-            <li key={contact.id} className="flex justify-between items-center group">
-              <div>
-                <p className="font-medium">{contact.name}</p>
-                <p className="text-sm text-muted-foreground">+91 {contact.phone}</p>
-              </div>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEdit(contact)}>
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDelete(contact.id)}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingContact ? 'Edit Contact' : 'Add New Contact'}</DialogTitle>
-              <DialogDescription>
-                Enter the details of your emergency contact.
-              </DialogDescription>
-            </DialogHeader>
-            <EmergencyContactForm
-              onSave={handleSaveContact}
-              contact={editingContact}
-            />
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
-  );
-};
-
-
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -326,7 +171,7 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
   const initialState: ActionState = null;
   const [state, formAction] = useActionState(submitIncidentReportAction, initialState);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (state?.result?.confirmation) {
       toast({
         title: "Report Submitted",
@@ -371,73 +216,19 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
   )
 }
 
-const SOSDialog = ({ contacts }: { contacts: Contact[] }) => {
-  return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle className="text-center text-2xl text-destructive">EMERGENCY</DialogTitle>
-        <DialogDescription className="text-center">
-          Choose a contact to call immediately.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="py-4 space-y-3">
-        {contacts.length > 0 ? (
-          contacts.map(contact => (
-            <a key={contact.id} href={`tel:+91${contact.phone}`} className="block">
-              <Button variant="destructive" className="w-full h-14 text-lg justify-between">
-                <span>Call {contact.name}</span>
-                <Phone />
-              </Button>
-            </a>
-          ))
-        ) : (
-          <p className="text-center text-muted-foreground">
-            You have no emergency contacts. Please add one.
-          </p>
-        )}
-      </div>
-      <DialogFooter>
-        <DialogClose asChild>
-          <Button type="button" variant="secondary" className="w-full">Cancel</Button>
-        </DialogClose>
-      </DialogFooter>
-    </DialogContent>
-  )
-}
-
-export default function DashboardPage() {
+export default function FindRoutePage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [contacts, setContacts] = useState<Contact[]>([
-    { id: '1', name: 'Jane Doe', phone: '9876543210' },
-    { id: '2', name: 'John Smith', phone: '9988776655' },
-  ]);
-
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-    return (
-      <div className="w-full h-full bg-muted flex items-center justify-center">
-        <div className="text-center text-muted-foreground p-4">
-          <p className="font-bold">Google Maps API key is missing.</p>
-          <p className="text-sm">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file.</p>
-        </div>
-      </div>
-    );
-  }
-
+  
   return (
-    <APIProvider apiKey={apiKey}>
-      <div className="flex h-dvh bg-background font-body">
+    <MainLayout>
+      <div className="flex h-dvh">
         <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
           <ScrollArea className="h-full">
             <div className="p-6 space-y-6">
-              <AppHeader />
-              <Separator />
               <RoutePlanner onScoreGenerated={setSafetyResult} />
               {safetyResult && <SafetyScoreCard result={safetyResult} />}
               <SafeSpotsList result={safetyResult} />
-              <EmergencyContacts contacts={contacts} setContacts={setContacts} />
             </div>
           </ScrollArea>
         </aside>
@@ -461,18 +252,9 @@ export default function DashboardPage() {
                 <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
               </SheetContent>
             </Sheet>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="destructive" className="font-bold shadow-lg animate-pulse">
-                  SOS
-                </Button>
-              </DialogTrigger>
-              <SOSDialog contacts={contacts} />
-            </Dialog>
           </div>
         </main>
       </div>
-    </APIProvider>
+    </MainLayout>
   );
 }
-
