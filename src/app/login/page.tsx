@@ -7,14 +7,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { FormEvent } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    
     // In a real app, you would handle authentication here.
-    // For now, we'll just redirect to the contacts page.
+    // For now, we'll just save email to localStorage and redirect.
+    if (email) {
+        try {
+            localStorage.setItem('userEmail', email);
+        } catch (error) {
+            console.error("Could not access localStorage", error);
+        }
+    }
     router.push('/contacts');
   };
 
@@ -29,7 +40,7 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" name="email" type="email" placeholder="m@example.com" required />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">

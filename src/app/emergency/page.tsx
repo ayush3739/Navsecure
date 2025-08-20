@@ -171,7 +171,7 @@ export default function EmergencyPage() {
                 <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                     <Info className="w-6 h-6 text-primary" />
                     <CardTitle className="text-xl">Safety Tips</CardTitle>
-                </Header>
+                </CardHeader>
                 <CardContent>
                     <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                     <li>Always inform someone about your travel plans</li>

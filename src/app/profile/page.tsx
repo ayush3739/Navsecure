@@ -8,8 +8,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function ProfilePage() {
+    const [email, setEmail] = useState('user@example.com');
+
+    useEffect(() => {
+        try {
+            const storedEmail = localStorage.getItem('userEmail');
+            if (storedEmail) {
+                setEmail(storedEmail);
+            }
+        } catch (error) {
+            console.error("Could not access localStorage", error);
+        }
+    }, []);
+
   return (
     <MainLayout>
       <div className="p-6 md:p-8 space-y-6">
@@ -45,7 +59,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" defaultValue="user@example.com" disabled />
+                    <Input id="email" type="email" value={email} disabled />
                 </div>
             </div>
 
