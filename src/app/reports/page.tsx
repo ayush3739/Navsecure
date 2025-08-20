@@ -120,84 +120,84 @@ export default function ReportsPage() {
 
   return (
  <APIProvider apiKey={apiKey || ""}>
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <MainLayout onSosActivate={handleSosActivate}>
-                <div className="p-6 md:p-8 space-y-6">
-                <header className="flex items-center justify-between">
-                    <div className='flex items-center gap-3'>
-                        <FileText className="w-8 h-8 text-primary" />
-                        <div>
-                        <h1 className="text-2xl font-bold text-foreground">My Reports</h1>
-                        <p className="text-muted-foreground">Track your submitted incidents</p>
-                        </div>
-                    </div>
-                     <SheetTrigger asChild>
-                        <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add New Report
-                        </Button>
-                    </SheetTrigger>
-                </header>
+    <MainLayout onSosActivate={handleSosActivate}>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <div className="p-6 md:p-8 space-y-6">
+          <header className="flex items-center justify-between">
+              <div className='flex items-center gap-3'>
+                  <FileText className="w-8 h-8 text-primary" />
+                  <div>
+                  <h1 className="text-2xl font-bold text-foreground">My Reports</h1>
+                  <p className="text-muted-foreground">Track your submitted incidents</p>
+                  </div>
+              </div>
+                <SheetTrigger asChild>
+                  <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add New Report
+                  </Button>
+              </SheetTrigger>
+          </header>
 
-                <Card>
-                    <CardHeader>
-                    <CardTitle>Submitted Reports</CardTitle>
-                    <CardDescription>
-                        Here is a list of all the incidents you have reported.
-                    </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead>Report ID</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Location</TableHead>
-                            <TableHead>Reason</TableHead>
-                            <TableHead className="text-right">Status</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {reports.map((report) => (
-                            <TableRow key={report.id}>
-                            <TableCell className="font-medium">{report.id}</TableCell>
-                            <TableCell>{report.date}</TableCell>
-                            <TableCell>{report.location}</TableCell>
-                            <TableCell>{report.reason}</TableCell>
-                            <TableCell className="text-right">
-                                <Badge
-                                variant={
-                                    report.status === 'Resolved' ? 'default' :
-                                    report.status === 'In Review' ? 'secondary' :
-                                    'destructive'
-                                }
-                                className={
-                                    report.status === 'Resolved' ? 'bg-green-500/20 text-green-500 border-green-500/30' :
-                                    report.status === 'In Review' ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30' :
-                                    ''
-                                }
-                                >
-                                {report.status}
-                                </Badge>
-                            </TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                    </CardContent>
-                </Card>
-                </div>
-            </MainLayout>
-            <SheetContent>
-                <SheetHeader>
-                <SheetTitle>Report an Incident</SheetTitle>
-                <SheetDescription>
-                    Your report helps us improve safety data for everyone. Describe what you're observing.
-                </SheetDescription>
-                </SheetHeader>
-                <IncidentReportForm onSubmitted={handleReportSubmitted} />
-            </SheetContent>
-        </Sheet>
-    </APIProvider>
+          <Card>
+              <CardHeader>
+              <CardTitle>Submitted Reports</CardTitle>
+              <CardDescription>
+                  Here is a list of all the incidents you have reported.
+              </CardDescription>
+              </CardHeader>
+              <CardContent>
+              <Table>
+                  <TableHeader>
+                  <TableRow>
+                      <TableHead>Report ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                  {reports.map((report) => (
+                      <TableRow key={report.id}>
+                      <TableCell className="font-medium">{report.id}</TableCell>
+                      <TableCell>{report.date}</TableCell>
+                      <TableCell>{report.location}</TableCell>
+                      <TableCell>{report.reason}</TableCell>
+                      <TableCell className="text-right">
+                          <Badge
+                          variant={
+                              report.status === 'Resolved' ? 'default' :
+                              report.status === 'In Review' ? 'secondary' :
+                              'destructive'
+                          }
+                          className={
+                              report.status === 'Resolved' ? 'bg-green-500/20 text-green-500 border-green-500/30' :
+                              report.status === 'In Review' ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30' :
+                              ''
+                          }
+                          >
+                          {report.status}
+                          </Badge>
+                      </TableCell>
+                      </TableRow>
+                  ))}
+                  </TableBody>
+              </Table>
+              </CardContent>
+          </Card>
+          </div>
+        <SheetContent>
+            <SheetHeader>
+            <SheetTitle>Report an Incident</SheetTitle>
+            <SheetDescription>
+                Your report helps us improve safety data for everyone. Describe what you're observing.
+            </SheetDescription>
+            </SheetHeader>
+            <IncidentReportForm onSubmitted={handleReportSubmitted} />
+        </SheetContent>
+      </Sheet>
+    </MainLayout>
+  </APIProvider>
   );
 }
