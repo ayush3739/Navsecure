@@ -50,13 +50,13 @@ import { cn } from '@/lib/utils';
 import { SOSButton } from '@/components/sos-button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
+import { PlaceAutocomplete } from '@/components/place-autocomplete';
 
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   const [selectedRoute, setSelectedRoute] = useState(result.allRoutes[0]);
 
   useEffect(() => {
-    // When a new result comes in, reset to the safest route
     setSelectedRoute(result.allRoutes[0]);
   }, [result]);
 
@@ -211,8 +211,7 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
   return (
     <form ref={formRef} action={formAction} className="space-y-4 py-4">
        <div>
-         <Input name="location" placeholder="Enter location of incident" required />
-         {state?.fieldErrors?.location && <p className="text-sm text-destructive mt-1">{state.fieldErrors.location[0]}</p>}
+         <PlaceAutocomplete name="location" placeholder="Enter location of incident" error={state?.fieldErrors?.location?.[0]} />
        </div>
        <div>
         <Select name="reason" required>
