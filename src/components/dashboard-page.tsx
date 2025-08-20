@@ -39,8 +39,7 @@ const AppHeader = () => (
 );
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
-  // Robust check to ensure we have all the data we need before rendering
-  if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0 || typeof result.safestRouteIndex !== 'number' || result.safestRouteIndex < 0 || result.safestRouteIndex >= result.allRoutes.length) {
+  if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0 || typeof result.safestRouteIndex !== 'number') {
     return null;
   }
 
@@ -51,10 +50,10 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   };
 
   const safestRoute = result.allRoutes[result.safestRouteIndex];
+  if (!safestRoute) return null;
 
-  // Correctly derive alternative routes by filtering out the safest one
   const alternativeRoutes = result.allRoutes
-    .map((route, index) => ({ ...route, originalIndex: index })) // Keep original index for keys
+    .map((route, index) => ({ ...route, originalIndex: index }))
     .filter((_, index) => index !== result.safestRouteIndex);
 
   return (
@@ -113,7 +112,6 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
     </Card>
   );
 };
-
 
 const SafeSpotsList = () => {
   const safeSpots = [
