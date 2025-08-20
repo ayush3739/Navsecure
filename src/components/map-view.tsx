@@ -23,18 +23,17 @@ const Polyline: FC<google.maps.PolylineOptions> = (options) => {
 };
 
 export function MapView() {
-  const position = { lat: 37.7749, lng: -122.4194 }; // San Francisco
+  const position = { lat: 28.6139, lng: 77.2090 }; // Delhi
   
   const mockRoutePath = [
-    { lat: 37.779, lng: -122.429 },
-    { lat: 37.775, lng: -122.425 },
-    { lat: 37.772, lng: -122.419 },
-    { lat: 37.774, lng: -122.412 },
+    { lat: 28.6315, lng: 77.2167 }, // Connaught Place
+    { lat: 28.6562, lng: 77.2410 }, // Red Fort
+    { lat: 28.5245, lng: 77.1855 }, // Qutub Minar
   ];
 
   const safeSpots = [
-    { id: 1, pos: { lat: 37.7752, lng: -122.4194 }, name: 'SF General Hospital', type: 'hospital' },
-    { id: 2, pos: { lat: 37.778, lng: -122.423 }, name: 'Mission Police Station', type: 'police' },
+    { id: 1, pos: { lat: 28.6358, lng: 77.2244 }, name: 'Lok Nayak Hospital', type: 'hospital' },
+    { id: 2, pos: { lat: 28.6324, lng: 77.2169 }, name: 'Connaught Place Police Station', type: 'police' },
   ];
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -54,7 +53,7 @@ export function MapView() {
     <APIProvider apiKey={apiKey}>
       <Map
         defaultCenter={position}
-        defaultZoom={14}
+        defaultZoom={12}
         mapId="saferoute-map"
         disableDefaultUI={true}
         gestureHandling={'greedy'}
