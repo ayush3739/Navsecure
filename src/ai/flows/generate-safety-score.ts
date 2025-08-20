@@ -32,23 +32,24 @@ const prompt = ai.definePrompt({
   name: 'generateSafetyScorePrompt',
   input: {schema: GenerateSafetyScoreInputSchema},
   output: {schema: GenerateSafetyScoreOutputSchema},
-  prompt: `You are an AI assistant that generates a safety score for a given route. Your task is to act as a safety analysis engine.
+  prompt: `You are an AI assistant that generates a safety score for a given route. Your task is to act as a creative safety analysis engine.
 
-  For the given input, you must simulate a realistic safety profile. Do not use a fixed score. Instead, generate a dynamic score based on a fictional but plausible assessment of the route's characteristics.
+  For the given input, you must simulate a realistic and **unique** safety profile. Do not use a fixed score. Instead, generate a dynamic score based on a fictional but plausible assessment of the route's characteristics.
 
-  IMPORTANT: Assume that a user has just submitted an incident report for the route below. This report indicates a safety concern. Your generated score MUST reflect this by being lower than it would otherwise be.
+  **IMPORTANT**: To ensure variability, you must come up with a creative and different set of circumstances for each route you analyze. The scores should not be the same.
 
   Route for Analysis: {{{routeData}}}
   Available Datasets for consideration: {{#each availableDatasets}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 
   Instructions:
-  1.  **Simulate Route Factors**: First, determine a baseline safety score by simulating a combination of factors. For instance:
-      -   A route with good lighting, CCTV, and low crime might have a baseline score of 85.
-      -   A route with poor lighting and proximity to a high-crime area might have a baseline of 60.
-  2.  **Apply a Small Penalty for the Incident**: Because a negative incident was just reported, you MUST reduce your calculated baseline score by a small but meaningful amount (e.g., 5% to 15%). The penalty should be justifiable. For example, "Suspicious activity" might warrant a 10-15% reduction, while "Damaged pavement" might only be a 5% reduction.
-  3.  **Provide Key Highlights**: Justify your final score with 2-3 brief highlights. One of these highlights MUST be "Recent incident reported". The other highlights should reflect your simulated factors (e.g., "Poor street lighting", "High crime area").
+  1.  **Simulate Unique Route Factors**: First, determine a baseline safety score by simulating a combination of fictional factors. Be creative. For instance:
+      -   Route A might be well-lit, pass a university campus, but have a recently reported "suspicious person" incident. Baseline: 80.
+      -   Route B might go through a deserted industrial park with known poor lighting, but has a police station nearby. Baseline: 65.
+      -   Route C could be a busy main road with heavy traffic (which can be a safety factor) and a report of a "road rage" incident. Baseline: 70.
+  2.  **Apply a Penalty for an Incident**: A negative incident has just been reported for the route. You MUST reduce your calculated baseline score by a small but meaningful amount (e.g., 5% to 15%). The penalty should be justifiable.
+  3.  **Provide Key Highlights**: Justify your final score with 2-3 brief highlights. One of these highlights MUST be "Recent incident reported". The other highlights should reflect your simulated factors (e.g., "Poor street lighting", "University campus nearby").
 
-  Return a unique safety score and corresponding highlights for the given route in the specified output format, ensuring the score is slightly lower to reflect the recent incident report. For example, if the baseline was 85, a final score might be 76.
+  Return a unique safety score and corresponding highlights for the given route in the specified output format. The final scores for different routes should be different. For example: 82, 65, 73.
 `,
 });
 

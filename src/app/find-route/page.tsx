@@ -67,11 +67,14 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
     return null;
   }
 
-  const getScoreColor = (score: number) => {
-    if (score > 75) return 'bg-green-500';
-    if (score > 50) return 'bg-orange-500';
-    return 'bg-red-500';
+  const getScoreColor = (routeIndex: number) => {
+    const routeColors = ['#16A34A', '#F97316', '#DC2626'];
+    return routeColors[routeIndex] || routeColors[routeColors.length - 1];
   };
+  
+  const findRouteIndex = (originalIndex: number) => {
+    return result.allRoutes.findIndex(route => route.originalIndex === originalIndex);
+  }
 
   const displayedRoute = selectedRoute || result.allRoutes[0];
   const alternativeRoutes = result.allRoutes.filter(r => r.originalIndex !== displayedRoute.originalIndex);
@@ -90,8 +93,8 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
           </div>
           <div className="w-full bg-secondary rounded-full h-4 mt-2">
             <div
-              className={`h-4 rounded-full transition-all duration-500 ${getScoreColor(displayedRoute.safetyScore)}`}
-              style={{ width: `${displayedRoute.safetyScore}%` }}
+              className={`h-4 rounded-full transition-all duration-500`}
+              style={{ width: `${displayedRoute.safetyScore}%`, backgroundColor: getScoreColor(findRouteIndex(displayedRoute.originalIndex)) }}
             />
           </div>
           <h4 className="font-semibold mt-4 mb-2 flex items-center gap-2">
@@ -119,8 +122,8 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
                   </div>
                   <div className="w-full bg-secondary rounded-full h-2.5 mt-1">
                     <div
-                      className={`h-2.5 rounded-full ${getScoreColor(route.safetyScore)}`}
-                      style={{ width: `${route.safetyScore}%` }}
+                      className={`h-2.5 rounded-full`}
+                      style={{ width: `${route.safetyScore}%`, backgroundColor: getScoreColor(findRouteIndex(route.originalIndex)) }}
                     />
                   </div>
                 </li>
