@@ -6,10 +6,13 @@ import {
   AdvancedMarker,
   useMap,
   useMapsLibrary,
+  ControlPosition,
+  useAdvancedMarkerRef
 } from '@vis.gl/react-google-maps';
-import { Hospital, ShieldCheck } from 'lucide-react';
+import { Hospital, ShieldCheck, Circle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SafetyScoreResult } from '@/lib/types';
+import { Card } from '@/components/ui/card';
 
 type MapViewProps = {
   route: {
@@ -54,7 +57,7 @@ const Directions = ({ route }: MapViewProps) => {
         // The safest route is green, second is orange, third is red.
         const routeColors = ['#16A34A', '#F97316', '#DC2626'];
 
-        response.routes.slice(0, 3).forEach((_, i) => {
+        response.routes.slice(0, 3).forEach((r, i) => {
           // Since allRoutes is sorted from safest to least safe, we can use the index directly.
           const color = routeColors[i] || routeColors[routeColors.length -1];
           
@@ -83,6 +86,33 @@ const Directions = ({ route }: MapViewProps) => {
   return null;
 }
 
+const MapLegend = () => {
+  return (
+    <Card className="m-2 p-3 bg-card/80 backdrop-blur-sm">
+      <h4 className="text-md font-semibold mb-2">Route Safety</h4>
+      <ul className="space-y-2 text-sm">
+        <li className="flex items-center gap-2">
+          <Circle className="h-4 w-4 text-green-500 fill-green-500" />
+          <span>Very Safe</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <Circle className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+          <span>Moderately Safe</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <Circle className="h-4 w-4 text-red-500 fill-red-500" />
+          <span>Less Safe</span>
+        </li>
+      </ul>
+      <div className="border-t my-2 border-border"></div>
+      <div className="flex items-center gap-2 text-sm">
+        <ShieldCheck className="h-4 w-4 text-blue-500" />
+        <span>Safe Spots</span>
+      </div>
+    </Card>
+  )
+}
+
 export function MapView({ route }: MapViewProps) {
   const position = { lat: 28.6139, lng: 77.2090 }; // Delhi
   
@@ -99,7 +129,12 @@ export function MapView({ route }: MapViewProps) {
         disableDefaultUI={true}
         gestureHandling={'greedy'}
         className="w-full h-full"
+        controlSize={28}
       >
+        <div className='absolute bottom-2 left-2'>
+          <MapLegend />
+        </div>
+
         <Directions route={route} />
         {safeSpots.map((spot) => (
           <AdvancedMarker key={spot.id} position={spot.pos} title={spot.name}>
