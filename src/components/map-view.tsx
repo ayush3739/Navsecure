@@ -6,12 +6,14 @@ import {
   AdvancedMarker,
   useMap,
   useMapsLibrary,
+  Pin
 } from '@vis.gl/react-google-maps';
 import { Hospital, ShieldCheck, HeartHandshake, Circle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SafetyScoreResult } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from './ui/skeleton';
 
 type MapViewProps = {
   route: {
@@ -55,17 +57,13 @@ const Directions = ({ route }: MapViewProps) => {
       .then(response => {
         const newRenderers: google.maps.DirectionsRenderer[] = [];
         
-        // The safest route is green, second is orange, third is red.
         const routeColors = ['#16A34A', '#F97316', '#DC2626'];
 
         const sortedGoogleRoutes = [...response.routes];
         
-        // Match our sorted routes with google's routes before rendering
         const ourSortedRoutes = route.allRoutes;
 
         ourSortedRoutes.forEach((ourRoute, ourIndex) => {
-            // Find the corresponding google route. This is a simplification.
-            // A more robust solution might compare route geometry.
             const googleRouteIndex = ourRoute.originalIndex;
             const googleRoute = sortedGoogleRoutes[googleRouteIndex];
 
@@ -134,14 +132,62 @@ const MapLegend = () => {
   )
 }
 
+const DynamicSafeSpots = () => {
+  const map = useMap();
+  const placesLibrary = useMapsLibrary('places');
+  const [placesService, setPlacesService] = useState<google.maps.places.PlacesService | null>(null);
+  const [safeSpots, setSafeSpots] = useState<google.maps.places.PlaceResult[]>([]);
+  
+  useEffect(() => {
+    if (placesLibrary && map) {
+      setPlacesService(new placesLibrary.PlacesService(map));
+    }
+  }, [placesLibrary, map]);
+
+  useEffect(() => {
+    if (!placesService) return;
+
+    navigator.geolocation.getCurrentPosition(position => {
+      const location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+      
+      const keywords = ['police', 'hospital', "women's shelter"];
+      
+      Promise.all(keywords.map(keyword => 
+        placesService.nearbySearch({ location, radius: 5000, keyword }, (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            return results;
+          }
+          return [];
+        })
+      )).then(resultsArrays => {
+        const allSpots = resultsArrays.flat();
+        setSafeSpots(allSpots.slice(0, 10)); // Limit to 10 spots for performance
+      });
+    });
+  }, [placesService]);
+
+  const getIcon = (types?: string[]) => {
+    if (types?.includes('police')) return <ShieldCheck className="h-5 w-5 text-blue-400" />;
+    if (types?.includes('hospital')) return <Hospital className="h-5 w-5 text-green-400" />;
+    return <HeartHandshake className="h-5 w-5 text-pink-400" />;
+  };
+
+  return (
+    <>
+      {safeSpots.map((spot) => (
+        spot.geometry?.location && <AdvancedMarker key={spot.place_id} position={spot.geometry.location} title={spot.name}>
+          <div className='p-2 bg-card rounded-full shadow-lg'>
+            {getIcon(spot.types)}
+          </div>
+        </AdvancedMarker>
+      ))}
+    </>
+  );
+};
+
+
 export function MapView({ route }: MapViewProps) {
   const position = { lat: 28.6139, lng: 77.2090 }; // Delhi
-  
-  const safeSpots = [
-    { id: 1, pos: { lat: 28.6358, lng: 77.2244 }, name: 'Lok Nayak Hospital', type: 'hospital' },
-    { id: 2, pos: { lat: 28.6324, lng: 77.2169 }, name: 'Connaught Place Police Station', type: 'police' },
-    { id: 3, pos: { lat: 28.6275, lng: 77.2155 }, name: 'Govt Girls Senior Secondary School', type: 'shelter' },
-  ];
 
   return (
       <Map
@@ -158,13 +204,8 @@ export function MapView({ route }: MapViewProps) {
         </div>
         
         <Directions route={route} />
-        {safeSpots.map((spot) => (
-          <AdvancedMarker key={spot.id} position={spot.pos} title={spot.name}>
-            <div className='p-2 bg-card rounded-full shadow-lg'>
-              {spot.type === 'hospital' ? <Hospital className="h-5 w-5 text-green-400" /> : spot.type === 'police' ? <ShieldCheck className="h-5 w-5 text-blue-400" /> : <HeartHandshake className="h-5 w-5 text-pink-400" />}
-            </div>
-          </AdvancedMarker>
-        ))}
+        <DynamicSafeSpots />
+
       </Map>
   );
 }

@@ -1,19 +1,11 @@
 
 'use client';
 
-import { useState, useActionState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { ActionState, SafetyScoreResult } from '@/lib/types';
 import {
   Shield,
-  MapPin,
-  Hospital,
-  ShieldCheck,
-  HeartHandshake,
-  MessageCircleWarning,
   Info,
-  Loader2,
-  Send,
-  PanelLeft,
   Menu,
   Compass,
   FileText,
@@ -21,6 +13,8 @@ import {
   User,
   AlertTriangle,
   LocateFixed,
+  PanelLeft,
+  MessageCircleWarning,
 } from 'lucide-react';
 import { APIProvider, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 
@@ -37,23 +31,16 @@ import {
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useFormStatus } from 'react-dom';
-import { submitIncidentReportAction } from '@/app/actions';
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { IncidentReportForm } from '@/components/incident-report-form';
 import { RoutePlanner } from '@/components/route-planner';
 import { MapView } from '@/components/map-view';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { SOSButton } from '@/components/sos-button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { PlaceAutocomplete } from '@/components/place-autocomplete';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { IncidentReportForm } from '@/components/incident-report-form';
+import { SafeSpotsList } from '@/components/safe-spots-list';
 
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
@@ -71,7 +58,7 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
     const routeColors = ['#16A34A', '#F97316', '#DC2626'];
     return routeColors[routeIndex] || routeColors[routeColors.length - 1];
   };
-  
+
   const findRouteIndex = (originalIndex: number) => {
     return result.allRoutes.findIndex(route => route.originalIndex === originalIndex);
   }
@@ -136,39 +123,6 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   );
 };
 
-const SafeSpotsList = ({ result }: { result: SafetyScoreResult | null }) => {
-  const safeSpots = [
-    { name: 'Lok Nayak Hospital', type: 'Hospital', icon: Hospital },
-    { name: 'Connaught Place Police Station', type: 'Police', icon: ShieldCheck },
-    { name: 'Govt Girls Senior Secondary School', type: 'Shelter', icon: HeartHandshake },
-  ];
-  
-  if (!result) return null;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" />
-          Nearby Safe Spots
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-4">
-          {safeSpots.map((spot) => (
-            <li key={spot.name} className="flex items-center gap-4">
-              <spot.icon className="w-6 h-6 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{spot.name}</p>
-                <p className="text-sm text-muted-foreground">{spot.type}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-};
 
 const CurrentLocationControl = () => {
   const map = useMap();
@@ -261,7 +215,7 @@ export default function FindRoutePage() {
                 <div className="p-6 space-y-6">
                     <RoutePlanner onScoreGenerated={setSafetyResult} />
                     {safetyResult && <SafetyScoreCard result={safetyResult} />}
-                    <SafeSpotsList result={safetyResult} />
+                    {safetyResult && <SafeSpotsList />}
                 </div>
             </ScrollArea>
         </aside>
