@@ -12,9 +12,24 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
+type Contact = {
+  id: number;
+  name: string;
+  phone: string;
+};
+
+type Coordinates = {
+    latitude: number;
+    longitude: number;
+} | null;
+
+
 export default function ProfilePage() {
     const [email, setEmail] = useState('user@example.com');
     const [photo, setPhoto] = useState('https://placehold.co/100x100.png');
+    const [primaryContact, setPrimaryContact] = useState<Contact | null>(null);
+    const [location, setLocation] = useState<Coordinates>(null);
+    const [locationError, setLocationError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const { toast } = useToast();
@@ -29,8 +44,34 @@ export default function ProfilePage() {
             if (storedPhoto) {
                 setPhoto(storedPhoto);
             }
+            const storedContacts = localStorage.getItem('emergencyContacts');
+            if (storedContacts) {
+                const contacts: Contact[] = JSON.parse(storedContacts);
+                if (contacts.length > 0) {
+                    setPrimaryContact(contacts[0]);
+                }
+            }
         } catch (error) {
             console.error("Could not access localStorage", error);
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                    setLocationError(null);
+                },
+                (error) => {
+                    setLocationError(`Location Error: ${error.message}`);
+                    console.error(`Location Error: ${error.message}`);
+                }
+            );
+        } else {
+             setLocationError("Geolocation is not supported by this browser.");
+             console.error("Geolocation is not supported by this browser.");
         }
     }, []);
 
@@ -73,8 +114,33 @@ export default function ProfilePage() {
         }
     };
 
+    const handleSaveChanges = () => {
+        toast({
+            title: 'Changes Saved',
+            description: 'Your profile has been updated successfully.',
+        });
+    };
+
+    const handleSosActivate = () => {
+        if (primaryContact) {
+            alert(`Initiating call to ${primaryContact.name}...`);
+            window.location.href = `tel:91${primaryContact.phone}`;
+
+            if (location) {
+                const whatsappMessage = `Emergency! I need help. This is my current location.`;
+                const whatsappUrl = `https://wa.me/91${primaryContact.phone}?text=${encodeURIComponent(whatsappMessage)}%0Ahttps://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+                alert(`Preparing to share location with ${primaryContact.name} via WhatsApp.`);
+                window.open(whatsappUrl, '_blank');
+            } else {
+                alert(`Could not get your location to share. ${locationError || ''}`);
+            }
+        } else {
+            alert(`Sharing live location with emergency services.`);
+        }
+    };
+
   return (
-    <MainLayout>
+    <MainLayout onSosActivate={handleSosActivate}>
       <div className="p-6 md:p-8 space-y-6">
         <header className="flex items-center gap-3">
             <User className="w-8 h-8 text-primary" />
@@ -98,11 +164,11 @@ export default function ProfilePage() {
               <div>
                 <Button onClick={handlePhotoChangeClick}>Change Photo</Button>
                 <p className="text-xs text-muted-foreground mt-2">JPG, GIF or PNG. 1MB max.</p>
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
+                <input
+                    type="file"
+                    ref={fileInputRef}
                     onChange={handleFileChange}
-                    className="hidden" 
+                    className="hidden"
                     accept="image/png, image/jpeg, image/gif"
                 />
               </div>
@@ -129,7 +195,7 @@ export default function ProfilePage() {
 
             <div className='flex justify-end gap-2'>
                 <Button onClick={handleLogout} variant="outline">Logout</Button>
-                <Button>Save Changes</Button>
+                <Button onClick={handleSaveChanges}>Save Changes</Button>
             </div>
           </CardContent>
         </Card>
