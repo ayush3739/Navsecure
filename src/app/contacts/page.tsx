@@ -60,7 +60,7 @@ export default function ContactsPage() {
   return (
     <MainLayout>
       <div className="p-6 md:p-8 space-y-6">
-        <header className="flex items-center justify-between">
+        <header className="space-y-4">
             <div className='flex items-center gap-3'>
                 <Phone className="w-8 h-8 text-primary" />
                 <div>
@@ -68,7 +68,7 @@ export default function ContactsPage() {
                     <p className="text-muted-foreground">Manage your trusted contacts</p>
                 </div>
             </div>
-            <Button onClick={handleAddNew}>
+            <Button onClick={handleAddNew} className="w-full md:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add New Contact
             </Button>
