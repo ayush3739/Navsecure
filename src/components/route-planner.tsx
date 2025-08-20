@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useActionState, useState } from 'react';
+import { useEffect, useRef, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Search, Loader2 } from 'lucide-react';
 import { getSafetyScoreAction } from '@/app/actions';
@@ -34,16 +34,14 @@ function SubmitButton() {
 const PlaceAutocomplete = ({ name, placeholder, error }: { name: string, placeholder: string, error?: string }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const places = useMapsLibrary('places');
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
     if (!places || !inputRef.current) return;
     
-    const autocompleteInstance = new places.Autocomplete(inputRef.current, {
+    const autocomplete = new places.Autocomplete(inputRef.current, {
       fields: ['formatted_address', 'geometry', 'name'],
     });
 
-    setAutocomplete(autocompleteInstance);
   }, [places]);
 
   return (

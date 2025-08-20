@@ -50,7 +50,6 @@ const Directions = ({ route }: MapViewProps) => {
         setRoutes(response.routes);
       });
 
-    return () => directionsRenderer.setMap(null);
   }, [directionsService, directionsRenderer, route]);
 
 
