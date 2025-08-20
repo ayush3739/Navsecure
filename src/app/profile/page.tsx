@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
     const [email, setEmail] = useState('user@example.com');
+    const router = useRouter();
 
     useEffect(() => {
         try {
@@ -23,6 +25,15 @@ export default function ProfilePage() {
             console.error("Could not access localStorage", error);
         }
     }, []);
+
+    const handleLogout = () => {
+        try {
+            localStorage.removeItem('userEmail');
+        } catch (error) {
+            console.error("Could not access localStorage", error);
+        }
+        router.push('/login');
+    };
 
   return (
     <MainLayout>
@@ -71,7 +82,8 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className='flex justify-end'>
+            <div className='flex justify-end gap-2'>
+                <Button onClick={handleLogout} variant="outline">Logout</Button>
                 <Button>Save Changes</Button>
             </div>
           </CardContent>
