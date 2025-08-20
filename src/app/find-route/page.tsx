@@ -14,6 +14,7 @@ import {
   Loader2,
   Send,
 } from 'lucide-react';
+import { APIProvider } from '@vis.gl/react-google-maps';
 
 import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -219,42 +220,56 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
 export default function FindRoutePage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  
-  return (
-    <MainLayout>
-      <div className="flex h-dvh">
-        <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
-          <ScrollArea className="h-full">
-            <div className="p-6 space-y-6">
-              <RoutePlanner onScoreGenerated={setSafetyResult} />
-              {safetyResult && <SafetyScoreCard result={safetyResult} />}
-              <SafeSpotsList result={safetyResult} />
-            </div>
-          </ScrollArea>
-        </aside>
-        <main className="flex-1 relative">
-          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
-          <div className="absolute top-4 right-4 flex gap-2">
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="secondary">
-                  <MessageCircleWarning className="mr-2 h-4 w-4" />
-                  Live Reporting
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Report an Incident</SheetTitle>
-                  <SheetDescription>
-                    Your report helps us improve safety data for everyone. Describe what you're observing.
-                  </SheetDescription>
-                </SheetHeader>
-                <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
-              </SheetContent>
-            </Sheet>
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+      return (
+        <div className="w-full h-screen bg-muted flex items-center justify-center">
+          <div className="text-center text-muted-foreground p-4">
+            <p className="font-bold">Google Maps API key is missing.</p>
+            <p className="text-sm">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.</p>
           </div>
-        </main>
-      </div>
-    </MainLayout>
+        </div>
+      );
+  }
+
+  return (
+    <APIProvider apiKey={apiKey}>
+        <MainLayout>
+        <div className="flex h-dvh">
+            <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
+            <ScrollArea className="h-full">
+                <div className="p-6 space-y-6">
+                <RoutePlanner onScoreGenerated={setSafetyResult} />
+                {safetyResult && <SafetyScoreCard result={safetyResult} />}
+                <SafeSpotsList result={safetyResult} />
+                </div>
+            </ScrollArea>
+            </aside>
+            <main className="flex-1 relative">
+            <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
+            <div className="absolute top-4 right-4 flex gap-2">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                    <Button variant="secondary">
+                    <MessageCircleWarning className="mr-2 h-4 w-4" />
+                    Live Reporting
+                    </Button>
+                </SheetTrigger>
+                <SheetContent>
+                    <SheetHeader>
+                    <SheetTitle>Report an Incident</SheetTitle>
+                    <SheetDescription>
+                        Your report helps us improve safety data for everyone. Describe what you're observing.
+                    </SheetDescription>
+                    </SheetHeader>
+                    <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
+                </SheetContent>
+                </Sheet>
+            </div>
+            </main>
+        </div>
+        </MainLayout>
+    </APIProvider>
   );
 }

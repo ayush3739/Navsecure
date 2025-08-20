@@ -3,7 +3,6 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { Public_Sans } from 'next/font/google';
-import { APIProvider } from '@vis.gl/react-google-maps';
 
 export const metadata: Metadata = {
   title: 'SafeRoute',
@@ -41,10 +40,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${publicSans.variable} dark`}>
       <body className={cn('font-body antialiased')}>
-        <APIProvider apiKey={apiKey}>
-            {children}
-            <Toaster />
-        </APIProvider>
+        {children}
+        <Toaster />
       </body>
     </html>
   );
