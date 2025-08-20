@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import type { SafetyScoreResult } from '@/lib/types';
+import { useEffect, useState, useActionState, useRef } from 'react';
+import type { ActionState, SafetyScoreResult } from '@/lib/types';
 import {
   Shield,
   MapPin,
@@ -12,6 +12,8 @@ import {
   Phone,
   MessageCircleWarning,
   Info,
+  Loader2,
+  Send,
 } from 'lucide-react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
@@ -25,9 +27,16 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { useFormStatus } from 'react-dom';
+import { submitIncidentReportAction } from '@/app/actions';
 
 import { RoutePlanner } from './route-planner';
 import { MapView } from './map-view';
@@ -40,7 +49,7 @@ const AppHeader = () => (
 );
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
-  if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0 || typeof result.safestRouteIndex !== 'number') {
+  if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0) {
     return null;
   }
 
@@ -50,12 +59,8 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
     return 'bg-red-500';
   };
 
-  const safestRoute = result.allRoutes[result.safestRouteIndex];
-  if (!safestRoute) return null;
-
-  const alternativeRoutes = result.allRoutes
-    .map((route, index) => ({ ...route, originalIndex: index }))
-    .filter((_, index) => index !== result.safestRouteIndex);
+  const safestRoute = result.allRoutes[0];
+  const alternativeRoutes = result.allRoutes.slice(1);
 
   return (
     <Card>
@@ -92,10 +97,10 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
           <div>
             <h3 className="font-semibold mb-2">Alternative Routes</h3>
             <ul className="space-y-3">
-              {alternativeRoutes.map((route) => (
+              {alternativeRoutes.map((route, index) => (
                 <li key={route.originalIndex}>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">Route {route.originalIndex + 1}</span>
+                    <span className="font-medium text-muted-foreground">Alternative {index + 1}</span>
                     <span className="font-bold">{route.safetyScore}/100</span>
                   </div>
                   <div className="w-full bg-secondary rounded-full h-2.5 mt-1">
@@ -175,8 +180,80 @@ const EmergencyContacts = () => {
   );
 };
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Submitting...
+        </>
+      ) : (
+        <>
+          <Send className="mr-2 h-4 w-4" />
+          Submit Report
+        </>
+      )}
+    </Button>
+  );
+}
+
+const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  
+  const initialState: ActionState = null;
+  const [state, formAction] = useActionState(submitIncidentReportAction, initialState);
+
+  useEffect(() => {
+    if (state?.result?.confirmation) {
+      toast({
+        title: "Report Submitted",
+        description: state.result.confirmation.message,
+      });
+      formRef.current?.reset();
+      onSubmitted();
+    }
+    if (state?.error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: state.error,
+      });
+    }
+  }, [state, toast, onSubmitted]);
+
+  return (
+    <form ref={formRef} action={formAction} className="space-y-4 py-4">
+       <div>
+         <Input name="location" placeholder="Enter location of incident" required />
+         {state?.fieldErrors?.location && <p className="text-sm text-destructive mt-1">{state.fieldErrors.location[0]}</p>}
+       </div>
+       <div>
+        <Select name="reason" required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a reason" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Poor street lighting">Poor street lighting</SelectItem>
+            <SelectItem value="Suspicious activity">Suspicious activity</SelectItem>
+            <SelectItem value="Damaged pavement">Damaged pavement</SelectItem>
+            <SelectItem value="Unsafe gathering">Unsafe gathering</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
+          </SelectContent>
+        </Select>
+        {state?.fieldErrors?.reason && <p className="text-sm text-destructive mt-1">{state.fieldErrors.reason[0]}</p>}
+       </div>
+      <Textarea name="description" placeholder="Provide a brief description (optional)" />
+      <SubmitButton />
+    </form>
+  )
+}
+
 export default function DashboardPage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -207,9 +284,9 @@ export default function DashboardPage() {
           </ScrollArea>
         </aside>
         <main className="flex-1 relative">
-          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, safestRouteIndex: safetyResult.safestRouteIndex, allRoutes: safetyResult.allRoutes } : null} />
+          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
           <div className="absolute top-4 right-4 flex gap-2">
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="secondary">
                   <MessageCircleWarning className="mr-2 h-4 w-4" />
@@ -223,10 +300,7 @@ export default function DashboardPage() {
                     Your report helps us improve safety data for everyone. Describe what you're observing.
                   </SheetDescription>
                 </SheetHeader>
-                <div className="py-4">
-                  {/* Reporting form could go here */}
-                  <p className="text-sm text-muted-foreground">Live reporting form coming soon.</p>
-                </div>
+                <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
               </SheetContent>
             </Sheet>
             <Button variant="destructive" className="font-bold shadow-lg animate-pulse">
