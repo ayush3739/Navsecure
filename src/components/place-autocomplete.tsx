@@ -13,10 +13,16 @@ const AutocompletePortal = ({ children }: { children: React.ReactNode }) => {
   return mounted ? createPortal(children, document.body) : null;
 };
 
-export const PlaceAutocomplete = ({ name, placeholder, error }: { name: string, placeholder: string, error?: string }) => {
+export const PlaceAutocomplete = ({ name, placeholder, error, value, onValueChange }: { name: string, placeholder: string, error?: string, value?: string, onValueChange?: (value: string) => void }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const places = useMapsLibrary('places');
   const [pacContainer, setPacContainer] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (inputRef.current && value !== undefined) {
+      inputRef.current.value = value;
+    }
+  }, [value]);
 
   useEffect(() => {
     if (!places || !inputRef.current) return;
@@ -34,6 +40,7 @@ export const PlaceAutocomplete = ({ name, placeholder, error }: { name: string, 
       const place = autocomplete.getPlace();
       if (inputRef.current && place.formatted_address) {
         inputRef.current.value = place.formatted_address;
+        onValueChange?.(place.formatted_address);
       }
     });
 
@@ -43,11 +50,15 @@ export const PlaceAutocomplete = ({ name, placeholder, error }: { name: string, 
       }
     };
 
-  }, [places]);
+  }, [places, onValueChange]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onValueChange?.(e.target.value);
+  }
 
   return (
     <div className="space-y-2">
-      <Input ref={inputRef} name={name} placeholder={placeholder} required />
+      <Input ref={inputRef} name={name} placeholder={placeholder} required onChange={handleChange} />
       {error && <p className="text-sm text-destructive">{error}</p>}
       {pacContainer && (
         <AutocompletePortal>
