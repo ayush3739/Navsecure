@@ -5,13 +5,14 @@ import { MainLayout } from '@/components/main-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone, MapPin, Info } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { SOSButton } from '@/components/sos-button';
 
 
 export default function EmergencyPage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const [primaryContact, setPrimaryContact] = useState({ name: 'Jane Doe', phone: '9876543210' });
 
     if (!apiKey) {
         return (
@@ -50,8 +51,8 @@ export default function EmergencyPage() {
                 <CardTitle className="text-xl">Quick Call</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <a href="tel:">
-                        <Button className="w-full">Call Emergency Contact</Button>
+                    <a href={`tel:${primaryContact.phone}`}>
+                        <Button className="w-full">Call {primaryContact.name}</Button>
                     </a>
                 </CardContent>
             </Card>
@@ -61,7 +62,7 @@ export default function EmergencyPage() {
                 <CardTitle className="text-xl">Share Location</CardTitle>
                 </CardHeader>
                 <CardContent>
-                <Button className="w-full" onClick={() => alert('Live location sent!')}>Send Live Location</Button>
+                <Button className="w-full" onClick={() => alert('Live location sent to your contacts!')}>Send Live Location</Button>
                 </CardContent>
             </Card>
             </div>
