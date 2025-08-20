@@ -7,7 +7,7 @@ import {
   useMapsLibrary,
 } from '@vis.gl/react-google-maps';
 import { Hospital, ShieldCheck } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useState } from 'react';
 
 type MapViewProps = {
   route: {
