@@ -1,7 +1,26 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker, Polyline } from '@vis.gl/react-google-maps';
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  useMap,
+} from '@vis.gl/react-google-maps';
 import { Hospital, ShieldCheck } from 'lucide-react';
+import { useEffect, type FC } from 'react';
+
+const Polyline: FC<google.maps.PolylineOptions> = (options) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!map) return;
+    const polyline = new google.maps.Polyline(options);
+    polyline.setMap(map);
+    return () => {
+      polyline.setMap(null);
+    };
+  }, [map, options]);
+  return null;
+};
 
 export function MapView() {
   const position = { lat: 37.7749, lng: -122.4194 }; // San Francisco
@@ -43,7 +62,7 @@ export function MapView() {
       >
         <Polyline
             path={mockRoutePath}
-            strokeColor="#8A2BE2"
+            strokeColor="#E6E6FA"
             strokeOpacity={0.8}
             strokeWeight={6}
           />
