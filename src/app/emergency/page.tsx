@@ -7,44 +7,8 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone, MapPin, Info } from 'lucide-react';
 import React from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
+import { SOSButton } from '@/components/sos-button';
 
-
-const SOSButton = () => {
-  const [isPressed, setIsPressed] = React.useState(false);
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleMouseDown = () => {
-    setIsPressed(true);
-    timerRef.current = setTimeout(() => {
-        // In a real app, this would trigger an emergency alert to contacts.
-        alert('Emergency Alert Activated!');
-        setIsPressed(false);
-    }, 3000);
-  };
-
-  const handleMouseUp = () => {
-    setIsPressed(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-  };
-
-  return (
-    <div
-      className="relative w-40 h-40 rounded-full flex items-center justify-center cursor-pointer select-none"
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onTouchStart={handleMouseDown}
-      onTouchEnd={handleMouseUp}
-    >
-      <div className="absolute inset-0 bg-red-500 rounded-full animate-pulse"></div>
-      <div className={`absolute inset-0 bg-red-600 rounded-full transition-transform duration-3000 ease-linear ${isPressed ? 'scale-100' : 'scale-0'}`} style={{transformOrigin: 'center'}}></div>
-      <div className="relative w-32 h-32 bg-red-700 rounded-full flex items-center justify-center shadow-inner">
-        <span className="text-white text-3xl font-bold">SOS</span>
-      </div>
-    </div>
-  );
-}
 
 export default function EmergencyPage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;

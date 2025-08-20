@@ -21,7 +21,7 @@ import {
   SidebarMenuButton,
   SidebarProvider,
 } from '@/components/ui/sidebar';
-import { cn } from '@/lib/utils';
+import { SOSButton } from './sos-button';
 
 
 const AppLogo = () => (
@@ -96,6 +96,12 @@ const SafetyStatus = () => (
 
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  if (pathname === '/find-route') {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
         <div className="flex h-dvh bg-background">
@@ -130,7 +136,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             </Sidebar>
 
             <div className="flex-1 flex flex-col h-full">
-                {children}
+                <main className="flex-1 overflow-y-auto">
+                    {children}
+                </main>
+            </div>
+             <div className="absolute bottom-4 right-4 z-20">
+                <SOSButton />
             </div>
         </div>
     </SidebarProvider>

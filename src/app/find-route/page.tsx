@@ -13,7 +13,7 @@ import {
   Info,
   Loader2,
   Send,
-  Search,
+  PanelLeft,
 } from 'lucide-react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 
@@ -40,7 +40,9 @@ import { submitIncidentReportAction } from '@/app/actions';
 import { RoutePlanner } from '@/components/route-planner';
 import { MapView } from '@/components/map-view';
 import React from 'react';
-import { MainLayout } from '@/components/main-layout';
+import { cn } from '@/lib/utils';
+import { SOSButton } from '@/components/sos-button';
+
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0) {
@@ -221,6 +223,7 @@ const LiveReportingForm = ({onSubmitted}: {onSubmitted: () => void}) => {
 export default function FindRoutePage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   if (!apiKey) {
@@ -236,41 +239,50 @@ export default function FindRoutePage() {
 
   return (
     <APIProvider apiKey={apiKey}>
-      <MainLayout>
-        <div className="flex h-full">
-            <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border">
-                <ScrollArea className="h-full">
-                    <div className="p-6 space-y-6">
-                        <RoutePlanner onScoreGenerated={setSafetyResult} />
-                        {safetyResult && <SafetyScoreCard result={safetyResult} />}
-                        <SafeSpotsList result={safetyResult} />
-                    </div>
-                </ScrollArea>
-            </aside>
-            <main className="flex-1 relative">
-            <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
-            <div className="absolute top-4 right-4 flex gap-2">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="secondary">
-                    <MessageCircleWarning className="mr-2 h-4 w-4" />
-                    Live Reporting
-                    </Button>
-                </SheetTrigger>
-                <SheetContent>
-                    <SheetHeader>
-                    <SheetTitle>Report an Incident</SheetTitle>
-                    <SheetDescription>
-                        Your report helps us improve safety data for everyone. Describe what you're observing.
-                    </SheetDescription>
-                    </SheetHeader>
-                    <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
-                </SheetContent>
-                </Sheet>
-            </div>
-            </main>
+      <div className="h-screen w-screen relative">
+        <aside className={cn(
+          "absolute top-0 left-0 h-full w-[400px] bg-card border-r border-border z-10 transition-transform duration-300 ease-in-out",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+            <ScrollArea className="h-full">
+                <div className="p-6 space-y-6">
+                    <RoutePlanner onScoreGenerated={setSafetyResult} />
+                    {safetyResult && <SafetyScoreCard result={safetyResult} />}
+                    <SafeSpotsList result={safetyResult} />
+                </div>
+            </ScrollArea>
+        </aside>
+
+        <main className="h-full w-full">
+          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
+        </main>
+        
+        <div className="absolute top-4 left-4 z-20 flex gap-2">
+            <Button variant="secondary" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                <PanelLeft className="h-5 w-5" />
+            </Button>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+                <Button variant="secondary">
+                <MessageCircleWarning className="mr-2 h-4 w-4" />
+                Live Reporting
+                </Button>
+            </SheetTrigger>
+            <SheetContent>
+                <SheetHeader>
+                <SheetTitle>Report an Incident</SheetTitle>
+                <SheetDescription>
+                    Your report helps us improve safety data for everyone. Describe what you're observing.
+                </SheetDescription>
+                </SheetHeader>
+                <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
+            </SheetContent>
+            </Sheet>
         </div>
-      </MainLayout>
+         <div className="absolute bottom-4 right-4 z-20">
+            <SOSButton />
+        </div>
+      </div>
     </APIProvider>
   );
 }
