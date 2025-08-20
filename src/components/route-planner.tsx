@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useRef, useActionState, useState } from 'react';
@@ -101,7 +102,6 @@ type RoutePlannerProps = {
 
 export function RoutePlanner({ onScoreGenerated }: RoutePlannerProps) {
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
   
   const initialState: ActionState = null;
   const [state, formAction] = useActionState(getSafetyScoreAction, initialState);
@@ -109,7 +109,6 @@ export function RoutePlanner({ onScoreGenerated }: RoutePlannerProps) {
   useEffect(() => {
     if (state?.result) {
       onScoreGenerated(state.result);
-      formRef.current?.reset();
     }
     if (state?.error) {
       onScoreGenerated(null);
@@ -128,7 +127,7 @@ export function RoutePlanner({ onScoreGenerated }: RoutePlannerProps) {
         <CardDescription>Enter your start and end points to get an AI-powered safety analysis.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={formAction} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <PlaceAutocomplete name="from" placeholder="From: e.g., '123 Main St, Anytown'" error={state?.fieldErrors?.from?.[0]} />
           <PlaceAutocomplete name="to" placeholder="To: e.g., 'City Park'" error={state?.fieldErrors?.to?.[0]} />
           <SubmitButton />
