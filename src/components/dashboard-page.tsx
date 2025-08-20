@@ -222,7 +222,7 @@ export default function DashboardPage() {
                   <SheetDescription>
                     Your report helps us improve safety data for everyone. Describe what you're observing.
                   </SheetDescription>
-                </Header>
+                </SheetHeader>
                 <div className="py-4">
                   {/* Reporting form could go here */}
                   <p className="text-sm text-muted-foreground">Live reporting form coming soon.</p>

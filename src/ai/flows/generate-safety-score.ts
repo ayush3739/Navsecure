@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -31,23 +32,22 @@ const prompt = ai.definePrompt({
   name: 'generateSafetyScorePrompt',
   input: {schema: GenerateSafetyScoreInputSchema},
   output: {schema: GenerateSafetyScoreOutputSchema},
-  prompt: `You are an AI assistant that generates a safety score for a given route based on available datasets.
+  prompt: `You are an AI assistant that generates a safety score for a given route. Your task is to act as a safety analysis engine.
 
-  Input route data: {{{routeData}}}
-  Available datasets: {{#each availableDatasets}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+  For the given input, you must simulate a realistic safety profile. Do not use a fixed score. Instead, generate a dynamic score based on a fictional but plausible assessment of the route's characteristics.
 
-  Based on the route data and available datasets, calculate a safety score and a list of 2-3 highlights for your reasoning. The safety score should be a number between 0 and 100, where 100 is the safest.
-  The highlights should be short phrases explaining the main reasons for the score.
+  Route for Analysis: {{{routeData}}}
+  Available Datasets for consideration: {{#each availableDatasets}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 
-  Consider factors such as:
-    - Crime rates in the area
-    - Street lighting
-    - Traffic conditions
-    - Population density
-    - Time of day
-    - Proximity to safe spots like police stations or hospitals
+  Instructions:
+  1.  **Generate a Dynamic Score**: Calculate a safety score between 0 and 100, where 100 is extremely safe. Each route should have a different score. For example, if you are asked to score three routes, produce three distinct and varied scores.
+  2.  **Simulate Route Factors**: Your scoring should be based on a simulated combination of factors. Imagine what the conditions might be like. For instance:
+      -   **Route 1** might have good lighting but pass through an area with a moderate crime rate.
+      -   **Route 2** could be poorly lit but have a visible police presence and CCTV.
+      -   **Route 3** may be well-lit, have low crime, and be near a hospital.
+  3.  **Provide Key Highlights**: Justify your score with 2-3 brief highlights. These should reflect your simulated factors (e.g., "Well-lit streets", "High crime area", "CCTV coverage", "No police stations nearby").
 
-  Return the safety score and highlights in the output format specified.
+  Return a unique safety score and corresponding highlights for the given route in the specified output format.
 `,
 });
 
