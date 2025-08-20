@@ -43,7 +43,7 @@ export function RoutePlanner({ onScoreGenerated }: RoutePlannerProps) {
 
   useEffect(() => {
     if (state?.result) {
-      onScoreGenerated(state.result);
+      onScoreGenerated(state.result as SafetyScoreResult);
     }
     if (state?.error) {
       onScoreGenerated(null);

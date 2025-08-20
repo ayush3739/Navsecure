@@ -119,7 +119,7 @@ export default function ReportsPage() {
     }
 
   return (
-    <APIProvider apiKey={apiKey}>
+ <APIProvider apiKey={apiKey || ""}>
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <MainLayout onSosActivate={handleSosActivate}>
                 <div className="p-6 md:p-8 space-y-6">

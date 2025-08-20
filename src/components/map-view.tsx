@@ -6,14 +6,11 @@ import {
   AdvancedMarker,
   useMap,
   useMapsLibrary,
-  ControlPosition,
-  useAdvancedMarkerRef
 } from '@vis.gl/react-google-maps';
-import { Hospital, ShieldCheck, HeartHandshake, Circle, LocateFixed } from 'lucide-react';
+import { Hospital, ShieldCheck, HeartHandshake, Circle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SafetyScoreResult } from '@/lib/types';
 import { Card } from '@/components/ui/card';
-import { Button } from './ui/button';
 
 type MapViewProps = {
   route: {
@@ -127,7 +124,7 @@ export function MapView({ route }: MapViewProps) {
       <Map
         defaultCenter={position}
         defaultZoom={12}
-        mapId="saferoute-map"
+        mapId="navsecure-map"
         disableDefaultUI={true}
         gestureHandling={'greedy'}
         className="w-full h-full"

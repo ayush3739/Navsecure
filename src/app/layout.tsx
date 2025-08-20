@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Public_Sans } from 'next/font/google';
 
 export const metadata: Metadata = {
-  title: 'SafeRoute',
+  title: 'NavSecure',
   description: 'AI-Powered Women’s Safety Navigation',
 };
 

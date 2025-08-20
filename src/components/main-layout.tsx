@@ -43,7 +43,7 @@ const AppLogo = () => (
             </svg>
         </div>
         <div>
-            <h2 className="text-lg font-semibold text-foreground">Safety Travel</h2>
+            <h2 className="text-lg font-semibold text-foreground">NavSecure</h2>
             <p className="text-xs text-muted-foreground">Women's Safety</p>
         </div>
     </div>
