@@ -235,18 +235,18 @@ export default function FindRoutePage() {
 
   return (
     <APIProvider apiKey={apiKey}>
-        <MainLayout>
-        <div className="flex h-dvh">
-            <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
+      <MainLayout>
+        <div className="grid md:grid-cols-[400px_1fr] h-full">
+          <aside className="bg-card border-r border-border flex-shrink-0 h-full">
             <ScrollArea className="h-full">
-                <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6">
                 <RoutePlanner onScoreGenerated={setSafetyResult} />
                 {safetyResult && <SafetyScoreCard result={safetyResult} />}
                 <SafeSpotsList result={safetyResult} />
-                </div>
+              </div>
             </ScrollArea>
-            </aside>
-            <main className="flex-1 relative">
+          </aside>
+          <main className="flex-1 relative">
             <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
             <div className="absolute top-4 right-4 flex gap-2">
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -267,9 +267,9 @@ export default function FindRoutePage() {
                 </SheetContent>
                 </Sheet>
             </div>
-            </main>
+          </main>
         </div>
-        </MainLayout>
+      </MainLayout>
     </APIProvider>
   );
 }

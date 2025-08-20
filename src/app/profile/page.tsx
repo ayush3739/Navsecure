@@ -62,26 +62,6 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-
-         <Card>
-          <CardHeader>
-            <CardTitle>Security</CardTitle>
-            <CardDescription>Manage your password and security settings.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-             <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input id="current-password" type="password" />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" />
-            </div>
-             <div className='flex justify-end'>
-                <Button>Update Password</Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </MainLayout>
   );
