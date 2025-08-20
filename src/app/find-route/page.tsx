@@ -22,7 +22,7 @@ import {
   AlertTriangle,
   LocateFixed,
 } from 'lucide-react';
-import { APIProvider, useMap } from '@vis.gl/react-google-maps';
+import { APIProvider, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -52,6 +52,7 @@ import { SOSButton } from '@/components/sos-button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { PlaceAutocomplete } from '@/components/place-autocomplete';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
@@ -261,9 +262,19 @@ const CurrentLocationControl = () => {
   }, [map]);
 
   return (
-    <Button size="icon" onClick={handleLocateClick} variant="secondary">
-        <LocateFixed className="h-5 w-5" />
-    </Button>
+    <>
+      <Button size="icon" onClick={handleLocateClick} variant="secondary">
+          <LocateFixed className="h-5 w-5" />
+      </Button>
+      {currentPosition && (
+        <AdvancedMarker position={currentPosition} title="You are here">
+           <Avatar className="h-8 w-8 border-2 border-primary shadow-lg">
+                <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
+                <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+        </AdvancedMarker>
+      )}
+    </>
   );
 };
 
@@ -338,7 +349,7 @@ export default function FindRoutePage() {
             </DropdownMenu>
         </div>
         
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                   <Button variant="secondary">
