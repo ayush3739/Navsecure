@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/sheet';
 import { IncidentReportForm } from '@/components/incident-report-form';
 import { useState } from 'react';
+import { APIProvider } from '@vis.gl/react-google-maps';
 
 type Report = {
   id: string;
@@ -91,72 +92,86 @@ const getStatusBadgeVariant = (status: Report['status']) => {
 
 export default function ReportsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    if (!apiKey) {
+        return (
+            <div className="w-full h-screen bg-muted flex items-center justify-center">
+            <div className="text-center text-muted-foreground p-4">
+                <p className="font-bold">Google Maps API key is missing.</p>
+                <p className="text-sm">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.</p>
+            </div>
+            </div>
+        );
+    }
 
   return (
-    <MainLayout>
-       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <div className="p-6 md:p-8 space-y-6">
-          <header className="flex items-center justify-between gap-3">
-            <div className='flex items-center gap-3'>
-              <FileText className="w-8 h-8 text-primary" />
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Incident Reports</h1>
-                <p className="text-muted-foreground">
-                  A log of all submitted incidents
-                </p>
-              </div>
-            </div>
-            <SheetTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add New Report
-                </Button>
-            </SheetTrigger>
-          </header>
+    <APIProvider apiKey={apiKey}>
+        <MainLayout>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <div className="p-6 md:p-8 space-y-6">
+            <header className="flex items-center justify-between gap-3">
+                <div className='flex items-center gap-3'>
+                <FileText className="w-8 h-8 text-primary" />
+                <div>
+                    <h1 className="text-2xl font-bold text-foreground">Incident Reports</h1>
+                    <p className="text-muted-foreground">
+                    A log of all submitted incidents
+                    </p>
+                </div>
+                </div>
+                <SheetTrigger asChild>
+                    <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add New Report
+                    </Button>
+                </SheetTrigger>
+            </header>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Submitted Reports</CardTitle>
-              <CardDescription>
-                Review the status of all incidents reported by the community.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockReports.map((report) => (
-                    <TableRow key={report.id}>
-                      <TableCell className="font-medium">{report.location}</TableCell>
-                      <TableCell>{report.reason}</TableCell>
-                      <TableCell>{report.date}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
-                      </TableCell>
+            <Card>
+                <CardHeader>
+                <CardTitle>Submitted Reports</CardTitle>
+                <CardDescription>
+                    Review the status of all incidents reported by the community.
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-         <SheetContent>
-            <SheetHeader>
-            <SheetTitle>Report an Incident</SheetTitle>
-            <SheetDescription>
-                Your report helps us improve safety data for everyone. Describe what you're observing.
-            </SheetDescription>
-            </SheetHeader>
-            <IncidentReportForm onSubmitted={() => setIsSheetOpen(false)} />
-        </SheetContent>
-      </Sheet>
-    </MainLayout>
+                    </TableHeader>
+                    <TableBody>
+                    {mockReports.map((report) => (
+                        <TableRow key={report.id}>
+                        <TableCell className="font-medium">{report.location}</TableCell>
+                        <TableCell>{report.reason}</TableCell>
+                        <TableCell>{report.date}</TableCell>
+                        <TableCell className="text-right">
+                            <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </CardContent>
+            </Card>
+            </div>
+            <SheetContent>
+                <SheetHeader>
+                <SheetTitle>Report an Incident</SheetTitle>
+                <SheetDescription>
+                    Your report helps us improve safety data for everyone. Describe what you're observing.
+                </SheetDescription>
+                </SheetHeader>
+                <IncidentReportForm onSubmitted={() => setIsSheetOpen(false)} />
+            </SheetContent>
+        </Sheet>
+        </MainLayout>
+    </APIProvider>
   );
 }
