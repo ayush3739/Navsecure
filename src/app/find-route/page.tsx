@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useActionState, useRef } from 'react';
+import { useState, useActionState, useRef, useEffect } from 'react';
 import type { ActionState, SafetyScoreResult } from '@/lib/types';
 import {
   Shield,
@@ -53,6 +53,13 @@ import Link from 'next/link';
 
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
+  const [selectedRoute, setSelectedRoute] = useState(result.allRoutes[0]);
+
+  useEffect(() => {
+    // When a new result comes in, reset to the safest route
+    setSelectedRoute(result.allRoutes[0]);
+  }, [result]);
+
   if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0) {
     return null;
   }
@@ -63,8 +70,8 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
     return 'bg-red-500';
   };
 
-  const safestRoute = result.allRoutes[0];
-  const alternativeRoutes = result.allRoutes.slice(1);
+  const displayedRoute = selectedRoute || result.allRoutes[0];
+  const alternativeRoutes = result.allRoutes.filter(r => r.originalIndex !== displayedRoute.originalIndex);
 
   return (
     <Card>
@@ -73,15 +80,15 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h3 className="font-semibold mb-2">Safest Route</h3>
+          <h3 className="font-semibold mb-2">{displayedRoute.originalIndex === result.allRoutes[0].originalIndex ? 'Safest Route' : `Alternative ${result.allRoutes.findIndex(r => r.originalIndex === displayedRoute.originalIndex)}`}</h3>
           <div className="flex items-center justify-between">
             <span className="font-medium">Safety Score</span>
-            <span className="text-2xl font-bold text-primary">{safestRoute.safetyScore}/100</span>
+            <span className="text-2xl font-bold text-primary">{displayedRoute.safetyScore}/100</span>
           </div>
           <div className="w-full bg-secondary rounded-full h-4 mt-2">
             <div
-              className={`h-4 rounded-full transition-all duration-500 ${getScoreColor(safestRoute.safetyScore)}`}
-              style={{ width: `${safestRoute.safetyScore}%` }}
+              className={`h-4 rounded-full transition-all duration-500 ${getScoreColor(displayedRoute.safetyScore)}`}
+              style={{ width: `${displayedRoute.safetyScore}%` }}
             />
           </div>
           <h4 className="font-semibold mt-4 mb-2 flex items-center gap-2">
@@ -89,7 +96,7 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
             Key Highlights:
           </h4>
           <div className="flex flex-wrap gap-2">
-            {safestRoute.highlights.map((highlight, index) => (
+            {displayedRoute.highlights.map((highlight, index) => (
               <Badge key={index} variant="secondary">{highlight}</Badge>
             ))}
           </div>
@@ -99,12 +106,12 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
 
         {alternativeRoutes.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-2">Alternative Routes</h3>
+            <h3 className="font-semibold mb-2">Other Routes</h3>
             <ul className="space-y-3">
-              {alternativeRoutes.map((route, index) => (
-                <li key={route.originalIndex}>
+              {alternativeRoutes.map((route) => (
+                <li key={route.originalIndex} onClick={() => setSelectedRoute(route)} className="cursor-pointer">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">Alternative {index + 1}</span>
+                    <span className="font-medium text-muted-foreground">Alternative {result.allRoutes.findIndex(r => r.originalIndex === route.originalIndex)}</span>
                     <span className="font-bold">{route.safetyScore}/100</span>
                   </div>
                   <div className="w-full bg-secondary rounded-full h-2.5 mt-1">
