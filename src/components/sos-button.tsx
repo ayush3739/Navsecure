@@ -1,96 +1,141 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useReducer, useEffect, useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import { ShieldCheck, X } from 'lucide-react';
 import { Button } from './ui/button';
-import { ShieldCheck } from 'lucide-react';
+
+const ACTIVATION_TIME = 3000; // 3 seconds
+
+type State = {
+  status: 'idle' | 'pressing' | 'activating' | 'confirmed';
+  startTime: number | null;
+};
+
+type Action =
+  | { type: 'PRESS_START' }
+  | { type: 'PRESS_END' }
+  | { type: 'ACTIVATE' }
+  | { type: 'CONFIRMED' }
+  | { type: 'CANCEL' }
+  | { type: 'RESET' };
+
+const initialState: State = {
+  status: 'idle',
+  startTime: null,
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'PRESS_START':
+      if (state.status === 'idle') {
+        return { status: 'pressing', startTime: Date.now() };
+      }
+      return state;
+    case 'PRESS_END':
+      if (state.status === 'pressing') {
+        return { status: 'idle', startTime: null };
+      }
+      return state;
+    case 'ACTIVATE':
+      if (state.status === 'pressing') {
+        return { ...state, status: 'activating' };
+      }
+      return state;
+    case 'CONFIRMED':
+        if (state.status === 'activating') {
+            return { ...state, status: 'confirmed' };
+        }
+        return state;
+    case 'CANCEL':
+    case 'RESET':
+      return { status: 'idle', startTime: null };
+    default:
+      return state;
+  }
+}
 
 export const SOSButton = ({ onActivate }: { onActivate: () => void }) => {
-  const [isPressed, setIsPressed] = useState(false);
-  const [isActivating, setIsActivating] = useState(false);
-  const [countdown, setCountdown] = useState(3);
-  
-  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const clearAllTimeouts = () => {
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
-    }
-    if (countdownTimerRef.current) {
-      clearInterval(countdownTimerRef.current);
-      countdownTimerRef.current = null;
-    }
-  };
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    if (isActivating) {
-      setCountdown(3);
-      countdownTimerRef.current = setInterval(() => {
-        setCountdown(prev => prev - 1);
-      }, 1000);
+    let timer: NodeJS.Timeout;
+    if (state.status === 'pressing') {
+      timer = setTimeout(() => {
+        dispatch({ type: 'ACTIVATE' });
+      }, ACTIVATION_TIME);
     }
-    return () => clearAllTimeouts();
-  }, [isActivating]);
+    return () => clearTimeout(timer);
+  }, [state.status]);
 
   useEffect(() => {
-    if (countdown === 0) {
-      clearAllTimeouts();
-      setIsActivating(false);
+    let activationTimer: NodeJS.Timeout;
+    if (state.status === 'activating') {
       onActivate();
+      dispatch({type: 'CONFIRMED'});
+      activationTimer = setTimeout(() => {
+        dispatch({ type: 'RESET' });
+      }, 3000); // Show confirmation for 3 seconds
     }
-  }, [countdown, onActivate]);
+    return () => clearTimeout(activationTimer);
+  }, [state.status, onActivate]);
 
-  const handlePressStart = () => {
-    setIsPressed(true);
-    pressTimerRef.current = setTimeout(() => {
-      setIsActivating(true);
-      setIsPressed(false); // Reset press state
-    }, 3000);
-  };
+  const handlePressStart = useCallback(() => {
+    dispatch({ type: 'PRESS_START' });
+  }, []);
 
-  const handlePressEnd = () => {
-    setIsPressed(false);
-    // Don't clear timeouts if we are already activating
-    if (!isActivating) {
-        clearAllTimeouts();
-    }
-  };
-
-  const handleCancel = () => {
-    setIsActivating(false);
-    clearAllTimeouts();
-  };
+  const handlePressEnd = useCallback(() => {
+    dispatch({ type: 'PRESS_END' });
+  }, []);
 
   return (
-    <div className="relative w-48 h-48 flex items-center justify-center">
-      {isActivating ? (
-        <div className="text-center">
-          <div className="text-destructive text-lg font-semibold animate-pulse">Sending Alert in...</div>
-          <div className="text-6xl font-bold text-destructive">{countdown}</div>
-          <Button onClick={handleCancel} variant="secondary" className="mt-4">
-            Cancel
-          </Button>
+    <div className="relative flex h-36 w-36 items-center justify-center select-none">
+      {state.status === 'confirmed' ? (
+        <div className="flex flex-col items-center text-center text-green-500">
+          <ShieldCheck className="h-16 w-16" />
+          <p className="mt-2 font-semibold">Alert Sent</p>
         </div>
       ) : (
-        <div
-          className="relative w-24 h-24 rounded-full flex items-center justify-center cursor-pointer select-none group"
-          onMouseDown={handlePressStart}
-          onMouseUp={handlePressEnd}
-          onMouseLeave={handlePressEnd}
-          onTouchStart={handlePressStart}
-          onTouchEnd={handlePressEnd}
-        >
-          <div className="absolute inset-0 bg-red-500 rounded-full animate-pulse group-hover:animate-none"></div>
+        <>
           <div
-            className={`absolute inset-0 bg-red-600 rounded-full transition-transform duration-[3s] ease-linear ${isPressed ? 'scale-100' : 'scale-0'}`}
-            style={{ transformOrigin: 'center' }}
-          ></div>
-          <div className="relative w-20 h-20 bg-red-700 rounded-full flex items-center justify-center shadow-inner">
-            <span className="text-white text-xl font-bold">SOS</span>
+            className={cn(
+              "absolute inset-0 rounded-full bg-destructive/20 transition-transform duration-200",
+              (state.status === 'pressing' || state.status === 'activating') && "scale-110"
+            )}
+          />
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: `conic-gradient(hsl(var(--destructive)) ${
+                state.status === 'pressing' ? '100%' : '0%'
+              }, transparent 0)`,
+              transition: `background ${ACTIVATION_TIME}ms linear`,
+            }}
+          />
+          <div
+            className="relative flex h-28 w-28 items-center justify-center rounded-full bg-destructive shadow-lg"
+            onMouseDown={handlePressStart}
+            onMouseUp={handlePressEnd}
+            onMouseLeave={handlePressEnd}
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd}
+          >
+            <span className="text-2xl font-bold text-destructive-foreground">
+              SOS
+            </span>
           </div>
-        </div>
+          {(state.status === 'pressing' || state.status === 'activating') && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -bottom-4 h-10 w-10 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              onClick={() => dispatch({ type: 'CANCEL' })}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
+        </>
       )}
     </div>
   );
