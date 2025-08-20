@@ -124,58 +124,6 @@ export default function ReportsPage() {
     <APIProvider apiKey={apiKey}>
         <MainLayout>
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <div className="p-6 md:p-8 space-y-6">
-            <header className="flex items-center justify-between gap-3">
-                <div className='flex items-center gap-3'>
-                <FileText className="w-8 h-8 text-primary" />
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Incident Reports</h1>
-                    <p className="text-muted-foreground">
-                    A log of all submitted incidents
-                    </p>
-                </div>
-                </div>
-                <SheetTrigger asChild>
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add New Report
-                    </Button>
-                </SheetTrigger>
-            </header>
-
-            <Card>
-                <CardHeader>
-                <CardTitle>Submitted Reports</CardTitle>
-                <CardDescription>
-                    Review the status of all incidents reported by the community.
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Status</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {reports.map((report) => (
-                        <TableRow key={report.id}>
-                        <TableCell className="font-medium">{report.location}</TableCell>
-                        <TableCell>{report.reason}</TableCell>
-                        <TableCell>{report.date}</TableCell>
-                        <TableCell className="text-right">
-                            <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
-                        </TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                </CardContent>
-            </Card>
-            </div>
             <SheetContent>
                 <SheetHeader>
                 <SheetTitle>Report an Incident</SheetTitle>
@@ -185,6 +133,59 @@ export default function ReportsPage() {
                 </SheetHeader>
                 <IncidentReportForm onSubmitted={handleReportSubmitted} />
             </SheetContent>
+
+            <div className="p-6 md:p-8 space-y-6">
+                <header className="flex items-center justify-between gap-3">
+                    <div className='flex items-center gap-3'>
+                    <FileText className="w-8 h-8 text-primary" />
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground">Incident Reports</h1>
+                        <p className="text-muted-foreground">
+                        A log of all submitted incidents
+                        </p>
+                    </div>
+                    </div>
+                    <SheetTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add New Report
+                        </Button>
+                    </SheetTrigger>
+                </header>
+
+                <Card>
+                    <CardHeader>
+                    <CardTitle>Submitted Reports</CardTitle>
+                    <CardDescription>
+                        Review the status of all incidents reported by the community.
+                    </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Reason</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="text-right">Status</TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {reports.map((report) => (
+                            <TableRow key={report.id}>
+                            <TableCell className="font-medium">{report.location}</TableCell>
+                            <TableCell>{report.reason}</TableCell>
+                            <TableCell>{report.date}</TableCell>
+                            <TableCell className="text-right">
+                                <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+                            </TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </Sheet>
         </MainLayout>
     </APIProvider>
