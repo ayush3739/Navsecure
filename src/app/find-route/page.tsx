@@ -69,7 +69,7 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
 
   const getScoreColor = (score: number) => {
     if (score > 75) return 'bg-green-500';
-    if (score > 40) return 'bg-yellow-500';
+    if (score > 50) return 'bg-orange-500';
     return 'bg-red-500';
   };
 
