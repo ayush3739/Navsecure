@@ -3,12 +3,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
+import { ShieldCheck } from 'lucide-react';
 
-export const SOSButton = () => {
+export const SOSButton = ({ onAlertSent }: { onAlertSent: () => void }) => {
   const [isPressed, setIsPressed] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [countdown, setCountdown] = useState(3);
-
+  
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -36,18 +37,16 @@ export const SOSButton = () => {
   useEffect(() => {
     if (countdown === 0) {
       clearAllTimeouts();
-      // In a real app, this would trigger actual API calls.
-      alert('Sharing live location with emergency contacts!');
-      alert('Calling emergency contacts!');
       setIsActivating(false);
+      onAlertSent();
     }
-  }, [countdown]);
+  }, [countdown, onAlertSent]);
 
   const handlePressStart = () => {
     setIsPressed(true);
     pressTimerRef.current = setTimeout(() => {
       setIsActivating(true);
-      setIsPressed(false); // End the "press" state to show the countdown
+      setIsPressed(false);
     }, 3000);
   };
 
