@@ -1,6 +1,6 @@
 export type SafetyScoreResult = {
   safetyScore: number;
-  reasoning: string;
+  highlights: string[];
 };
 
 export type ActionState = {

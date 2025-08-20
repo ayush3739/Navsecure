@@ -10,6 +10,7 @@ import {
   HeartHandshake,
   Phone,
   MessageCircleWarning,
+  Info,
 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 import { RoutePlanner } from './route-planner';
 import { MapView } from './map-view';
@@ -59,8 +61,15 @@ const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
           />
         </div>
         <div>
-          <h4 className="font-semibold mb-2">Reasoning:</h4>
-          <p className="text-sm text-muted-foreground">{result.reasoning}</p>
+          <h4 className="font-semibold mb-2 flex items-center gap-2">
+            <Info className="w-5 h-5" />
+            Key Highlights:
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {result.highlights.map((highlight, index) => (
+              <Badge key={index} variant="secondary">{highlight}</Badge>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

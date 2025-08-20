@@ -19,7 +19,7 @@ export type GenerateSafetyScoreInput = z.infer<typeof GenerateSafetyScoreInputSc
 
 const GenerateSafetyScoreOutputSchema = z.object({
   safetyScore: z.number().describe('A numerical score representing the safety of the route (higher is safer).'),
-  reasoning: z.string().describe('Explanation of how the safety score was calculated.'),
+  highlights: z.array(z.string()).describe('A list of 2-3 key factors or highlights in a few words (e.g., "Police station nearby", "Poor street lighting") that influenced the safety score.'),
 });
 export type GenerateSafetyScoreOutput = z.infer<typeof GenerateSafetyScoreOutputSchema>;
 
@@ -36,15 +36,18 @@ const prompt = ai.definePrompt({
   Input route data: {{{routeData}}}
   Available datasets: {{#each availableDatasets}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 
-  Based on the route data and available datasets, calculate a safety score and explain your reasoning. The safety score should be a number between 0 and 100, where 100 is the safest.
+  Based on the route data and available datasets, calculate a safety score and a list of 2-3 highlights for your reasoning. The safety score should be a number between 0 and 100, where 100 is the safest.
+  The highlights should be short phrases explaining the main reasons for the score.
+
   Consider factors such as:
     - Crime rates in the area
     - Street lighting
     - Traffic conditions
     - Population density
     - Time of day
+    - Proximity to safe spots like police stations or hospitals
 
-  Return the safety score and your reasoning in the output format specified. Adhere to the output schema description when generating the reasoning.
+  Return the safety score and highlights in the output format specified.
 `,
 });
 

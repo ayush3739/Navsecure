@@ -29,7 +29,7 @@ export async function getSafetyScoreAction(
 
   try {
     const routeData = `A route from "${from}" to "${to}" during the evening.`;
-    const availableDatasets = ['City Crime Statistics (2023)', 'Public Lighting Grid', 'Real-time Traffic Data'];
+    const availableDatasets = ['City Crime Statistics (2023)', 'Public Lighting Grid', 'Real-time Traffic Data', 'Safe Spot Locations'];
 
     const result = await generateSafetyScore({
       routeData,
