@@ -129,9 +129,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 </SidebarFooter>
             </Sidebar>
 
-            <main className="flex-1">
+            <div className="flex-1 flex h-full">
                 {children}
-            </main>
+            </div>
         </div>
     </SidebarProvider>
   );

@@ -39,6 +39,7 @@ import { submitIncidentReportAction } from '@/app/actions';
 import { RoutePlanner } from '@/components/route-planner';
 import { MapView } from '@/components/map-view';
 import React from 'react';
+import { MainLayout } from '@/components/main-layout';
 
 const SafetyScoreCard = ({ result }: { result: SafetyScoreResult }) => {
   if (!result || !Array.isArray(result.allRoutes) || result.allRoutes.length === 0) {
@@ -152,12 +153,12 @@ function SubmitButton() {
       {pending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Submitting...
+          Analyzing...
         </>
       ) : (
         <>
-          <Send className="mr-2 h-4 w-4" />
-          Submit Report
+          <Search className="mr-2 h-4 w-4" />
+          Find Safest Route
         </>
       )}
     </Button>
@@ -234,37 +235,37 @@ export default function FindRoutePage() {
 
   return (
     <APIProvider apiKey={apiKey}>
-        <div className="flex h-full">
-          <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border overflow-y-auto">
-              <div className="p-6 space-y-6">
-                <RoutePlanner onScoreGenerated={setSafetyResult} />
-                {safetyResult && <SafetyScoreCard result={safetyResult} />}
-                <SafeSpotsList result={safetyResult} />
-              </div>
-          </aside>
-          <main className="flex-1 relative h-full">
-            <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
-            <div className="absolute top-4 right-4 flex gap-2">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="secondary">
-                    <MessageCircleWarning className="mr-2 h-4 w-4" />
-                    Live Reporting
-                    </Button>
-                </SheetTrigger>
-                <SheetContent>
-                    <SheetHeader>
-                    <SheetTitle>Report an Incident</SheetTitle>
-                    <SheetDescription>
-                        Your report helps us improve safety data for everyone. Describe what you're observing.
-                    </SheetDescription>
-                    </SheetHeader>
-                    <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
-                </SheetContent>
-                </Sheet>
+      <MainLayout>
+        <aside className="w-[400px] flex-shrink-0 bg-card border-r border-border overflow-y-auto">
+            <div className="p-6 space-y-6">
+              <RoutePlanner onScoreGenerated={setSafetyResult} />
+              {safetyResult && <SafetyScoreCard result={safetyResult} />}
+              <SafeSpotsList result={safetyResult} />
             </div>
-          </main>
-        </div>
+        </aside>
+        <main className="flex-1 relative">
+          <MapView route={safetyResult ? { from: safetyResult.from!, to: safetyResult.to!, allRoutes: safetyResult.allRoutes } : null} />
+          <div className="absolute top-4 right-4 flex gap-2">
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                  <Button variant="secondary">
+                  <MessageCircleWarning className="mr-2 h-4 w-4" />
+                  Live Reporting
+                  </Button>
+              </SheetTrigger>
+              <SheetContent>
+                  <SheetHeader>
+                  <SheetTitle>Report an Incident</SheetTitle>
+                  <SheetDescription>
+                      Your report helps us improve safety data for everyone. Describe what you're observing.
+                  </SheetDescription>
+                  </SheetHeader>
+                  <LiveReportingForm onSubmitted={() => setIsSheetOpen(false)} />
+              </SheetContent>
+              </Sheet>
+          </div>
+        </main>
+      </MainLayout>
     </APIProvider>
   );
 }
