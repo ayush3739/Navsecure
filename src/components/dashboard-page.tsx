@@ -12,6 +12,7 @@ import {
   MessageCircleWarning,
   Info,
 } from 'lucide-react';
+import { APIProvider } from '@vis.gl/react-google-maps';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -140,48 +141,63 @@ const EmergencyContacts = () => {
 export default function DashboardPage() {
   const [safetyResult, setSafetyResult] = useState<SafetyScoreResult | null>(null);
 
-  return (
-    <div className="flex h-dvh overflow-hidden bg-background font-body">
-      <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
-        <ScrollArea className="h-full">
-          <div className="p-6 space-y-6">
-            <AppHeader />
-            <Separator />
-            <RoutePlanner onScoreGenerated={setSafetyResult} />
-            {safetyResult && <SafetyScoreCard result={safetyResult} />}
-            <SafeSpotsList />
-            <EmergencyContacts />
-          </div>
-        </ScrollArea>
-      </aside>
-      <main className="flex-1 relative">
-        <MapView />
-        <div className="absolute top-4 right-4 flex gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="secondary">
-                <MessageCircleWarning className="mr-2 h-4 w-4" />
-                Live Reporting
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Report an Incident</SheetTitle>
-                <SheetDescription>
-                  Your report helps us improve safety data for everyone. Describe what you're observing.
-                </SheetDescription>
-              </SheetHeader>
-              <div className="py-4">
-                {/* Reporting form could go here */}
-                <p className="text-sm text-muted-foreground">Live reporting form coming soon.</p>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <Button variant="destructive" className="font-bold shadow-lg animate-pulse">
-            SOS
-          </Button>
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+    return (
+      <div className="w-full h-full bg-muted flex items-center justify-center">
+        <div className="text-center text-muted-foreground p-4">
+          <p className="font-bold">Google Maps API key is missing.</p>
+          <p className="text-sm">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file.</p>
         </div>
-      </main>
-    </div>
+      </div>
+    );
+  }
+
+  return (
+    <APIProvider apiKey={apiKey} libraries={['places', 'routes']}>
+      <div className="flex h-dvh overflow-hidden bg-background font-body">
+        <aside className="w-full max-w-md bg-card border-r border-border flex-shrink-0">
+          <ScrollArea className="h-full">
+            <div className="p-6 space-y-6">
+              <AppHeader />
+              <Separator />
+              <RoutePlanner onScoreGenerated={setSafetyResult} />
+              {safetyResult && <SafetyScoreCard result={safetyResult} />}
+              <SafeSpotsList />
+              <EmergencyContacts />
+            </div>
+          </ScrollArea>
+        </aside>
+        <main className="flex-1 relative">
+          <MapView route={safetyResult ? { from: safetyResult.from, to: safetyResult.to } : null} />
+          <div className="absolute top-4 right-4 flex gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="secondary">
+                  <MessageCircleWarning className="mr-2 h-4 w-4" />
+                  Live Reporting
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Report an Incident</SheetTitle>
+                  <SheetDescription>
+                    Your report helps us improve safety data for everyone. Describe what you're observing.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="py-4">
+                  {/* Reporting form could go here */}
+                  <p className="text-sm text-muted-foreground">Live reporting form coming soon.</p>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <Button variant="destructive" className="font-bold shadow-lg animate-pulse">
+              SOS
+            </Button>
+          </div>
+        </main>
+      </div>
+    </APIProvider>
   );
 }

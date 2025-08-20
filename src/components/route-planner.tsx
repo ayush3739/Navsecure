@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useActionState } from 'react';
+import { useEffect, useRef, useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Search, Loader2 } from 'lucide-react';
 import { getSafetyScoreAction } from '@/app/actions';
 import type { ActionState, SafetyScoreResult } from '@/lib/types';
+import { useMapsLibrary } from '@vis.gl/react-google-maps';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,29 @@ function SubmitButton() {
     </Button>
   );
 }
+
+const PlaceAutocomplete = ({ name, placeholder, error }: { name: string, placeholder: string, error?: string }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const places = useMapsLibrary('places');
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+  useEffect(() => {
+    if (!places || !inputRef.current) return;
+    
+    const autocompleteInstance = new places.Autocomplete(inputRef.current, {
+      fields: ['formatted_address', 'geometry', 'name'],
+    });
+
+    setAutocomplete(autocompleteInstance);
+  }, [places]);
+
+  return (
+    <div className="space-y-2">
+      <Input ref={inputRef} name={name} placeholder={placeholder} required />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+};
 
 type RoutePlannerProps = {
   onScoreGenerated: (result: SafetyScoreResult | null) => void;
@@ -64,14 +88,8 @@ export function RoutePlanner({ onScoreGenerated }: RoutePlannerProps) {
       </CardHeader>
       <CardContent>
         <form ref={formRef} action={formAction} className="space-y-4">
-          <div className="space-y-2">
-            <Input name="from" placeholder="From: e.g., '123 Main St, Anytown'" required />
-            {state?.fieldErrors?.from && <p className="text-sm text-destructive">{state.fieldErrors.from[0]}</p>}
-          </div>
-          <div className="space-y-2">
-            <Input name="to" placeholder="To: e.g., 'City Park'" required />
-            {state?.fieldErrors?.to && <p className="text-sm text-destructive">{state.fieldErrors.to[0]}</p>}
-          </div>
+          <PlaceAutocomplete name="from" placeholder="From: e.g., '123 Main St, Anytown'" error={state?.fieldErrors?.from?.[0]} />
+          <PlaceAutocomplete name="to" placeholder="To: e.g., 'City Park'" error={state?.fieldErrors?.to?.[0]} />
           <SubmitButton />
         </form>
       </CardContent>

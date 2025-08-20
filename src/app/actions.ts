@@ -31,12 +31,13 @@ export async function getSafetyScoreAction(
     const routeData = `A route from "${from}" to "${to}" during the evening.`;
     const availableDatasets = ['City Crime Statistics (2023)', 'Public Lighting Grid', 'Real-time Traffic Data', 'Safe Spot Locations'];
 
-    const result = await generateSafetyScore({
+    const safetyScoreResult = await generateSafetyScore({
       routeData,
       availableDatasets,
     });
-
-    return { result };
+    
+    // We are returning the from/to here so the map can use it to render the route
+    return { result: { ...safetyScoreResult, from, to } };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to generate safety score. Please try again.' };
