@@ -9,10 +9,11 @@ import {
   ControlPosition,
   useAdvancedMarkerRef
 } from '@vis.gl/react-google-maps';
-import { Hospital, ShieldCheck, HeartHandshake, Circle } from 'lucide-react';
+import { Hospital, ShieldCheck, HeartHandshake, Circle, LocateFixed } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SafetyScoreResult } from '@/lib/types';
 import { Card } from '@/components/ui/card';
+import { Button } from './ui/button';
 
 type MapViewProps = {
   route: {
@@ -113,6 +114,50 @@ const MapLegend = () => {
   )
 }
 
+const CurrentLocationControl = () => {
+  const map = useMap();
+  const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
+
+  const handleLocateClick = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setCurrentPosition(pos);
+          map?.panTo(pos);
+          map?.setZoom(15);
+        },
+        () => {
+          // Handle location error
+          alert("Error: The Geolocation service failed.");
+        }
+      );
+    } else {
+      // Browser doesn't support Geolocation
+      alert("Error: Your browser doesn't support geolocation.");
+    }
+  };
+
+  return (
+    <>
+        <div className="absolute top-2 right-12 p-2">
+            <Button size="icon" onClick={handleLocateClick} variant="secondary">
+                <LocateFixed className="h-5 w-5" />
+            </Button>
+        </div>
+        {currentPosition && (
+            <AdvancedMarker position={currentPosition} title="Your Location">
+                 <div className="w-4 h-4 rounded-full bg-primary border-2 border-white shadow-md"></div>
+            </AdvancedMarker>
+        )}
+    </>
+  );
+};
+
+
 export function MapView({ route }: MapViewProps) {
   const position = { lat: 28.6139, lng: 77.2090 }; // Delhi
   
@@ -135,6 +180,8 @@ export function MapView({ route }: MapViewProps) {
         <div className='absolute bottom-2 left-2'>
           <MapLegend />
         </div>
+        
+        <CurrentLocationControl />
 
         <Directions route={route} />
         {safeSpots.map((spot) => (
